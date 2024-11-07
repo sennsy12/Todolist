@@ -1,0 +1,142 @@
+﻿@model IEnumerable<TodoList.Models.Todo>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+</head>
+<body>
+    <h1>Todo List</h1>
+    <ul id="todoList">
+        @foreach (var todo in Model)
+        {
+            <li id="todo-@todo.Id">
+                <strong>@todo.Title</strong> - @todo.Description
+                <br />
+                Completed: @todo.IsCompleted
+                <br />
+                <button class="editBtn" data-id="@todo.Id" data-title="@todo.Title" data-description="@todo.Description">Edit</button>
+                <button class="deleteBtn" data-id="@todo.Id">Delete</button>
+            </li>
+        }
+    </ul>
+
+    <h2>Add New Todo</h2>
+    <form id="addTodoForm">
+        <label>Title:</label><br>
+        <input type="text" id="todoTitle" name="title" required><br>
+        <label>Description:</label><br>
+        <textarea id="todoDescription" name="description"></textarea><br>
+        <button type="submit">Add Todo</button>
+    </form>
+
+    <h2>Edit Todo</h2>
+    <form id="editTodoForm" style="display:none;">
+        <label>Title:</label><br>
+        <input type="text" id="editTodoTitle" name="title" required><br>
+        <label>Description:</label><br>
+        <textarea id="editTodoDescription" name="description"></textarea><br>
+        <button type="submit">Save Changes</button>
+        <button type="button" id="cancelEditBtn">Cancel</button>
+    </form>
+
+    <script>
+        // Add Todo
+        document.getElementById('addTodoForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const title = document.getElementById('todoTitle').value;
+            const description = document.getElementById('todoDescription').value;
+
+            fetch('http://localhost:5121/Todo/api/todo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title: title, description: description }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const todoList = document.getElementById('todoList');
+                    const newTodo = document.createElement('li');
+                    newTodo.id = `todo-${data.id}`;
+                    newTodo.innerHTML = `
+                            <strong>${data.title}</strong> - ${data.description}
+                            <br />Completed: ${data.isCompleted}
+                            <br />
+                            <button class="editBtn" data-id="${data.id}" data-title="${data.title}" data-description="${data.description}">Edit</button>
+                            <button class="deleteBtn" data-id="${data.id}">Delete</button>
+                        `;
+                    todoList.appendChild(newTodo);
+                    document.getElementById('todoTitle').value = '';
+                    document.getElementById('todoDescription').value = '';
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        // Edit Todo
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('editBtn')) {
+                const todoId = event.target.dataset.id;
+                const todoTitle = event.target.dataset.title;
+                const todoDescription = event.target.dataset.description;
+
+                document.getElementById('editTodoTitle').value = todoTitle;
+                document.getElementById('editTodoDescription').value = todoDescription;
+                document.getElementById('editTodoForm').style.display = 'block';
+
+                document.getElementById('editTodoForm').onsubmit = function (e) {
+                    e.preventDefault();
+
+                    const updatedTitle = document.getElementById('editTodoTitle').value;
+                    const updatedDescription = document.getElementById('editTodoDescription').value;
+
+                    fetch(`http://localhost:5121/todo/${todoId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ title: updatedTitle, description: updatedDescription }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            const todoItem = document.getElementById(`todo-${todoId}`);
+                            todoItem.innerHTML = `
+                                    <strong>${data.title}</strong> - ${data.description}
+                                    <br />Completed: ${data.isCompleted}
+                                    <br />
+                                    <button class="editBtn" data-id="${data.id}" data-title="${data.title}" data-description="${data.description}">Edit</button>
+                                    <button class="deleteBtn" data-id="${data.id}">Delete</button>
+                                `;
+                            document.getElementById('editTodoForm').style.display = 'none';
+                        })
+                        .catch(error => console.error('Error:', error));
+                };
+            }
+
+            // Cancel edit
+            if (event.target.id === 'cancelEditBtn') {
+                document.getElementById('editTodoForm').style.display = 'none';
+            }
+        });
+
+        // Delete Todo
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('deleteBtn')) {
+                const todoId = event.target.dataset.id;
+
+                fetch(`http://localhost:5121/todo/${todoId}`, {
+                    method: 'DELETE',
+                })
+                    .then(() => {
+                        const todoItem = document.getElementById(`todo-${todoId}`);
+                        todoItem.remove();
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    </script>
+</body>
+</html>
