@@ -1,10 +1,12 @@
 import React from 'react';
-import TodoList from './TodoList';
+import MainComp from './MainComp';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function App() {
     return (
         <div className="App">
-            <TodoList />
+            <MainComp />
         </div>
     );
 }
