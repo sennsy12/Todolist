@@ -17,21 +17,15 @@ namespace TodoList.Controllers
             _todoService = todoService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            var todos = await _todoService.GetAllTodosAsync();
-            return View(todos);  
-        }
-
 
         [HttpGet("api")]
         public async Task<ActionResult<IEnumerable<Todo>>> GetAllTodos()
         {
             var todos = await _todoService.GetAllTodosAsync();
-            return Ok(todos);  
+            return Ok(todos);
         }
 
+        // Get a specific todo by ID
         [HttpGet("{id}")]
         public async Task<ActionResult<Todo>> GetTodo(int id)
         {
@@ -42,21 +36,20 @@ namespace TodoList.Controllers
             return Ok(todo);
         }
 
-
         [HttpPost("api/todo")]
         public async Task<IActionResult> CreateTodo([FromBody] TodoCreateDto todoDto)
         {
             try
             {
                 var newTodo = await _todoService.CreateTodoAsync(todoDto);
-                return Ok(newTodo); 
+                return Ok(newTodo);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Feil ved oppretting av Todo: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTodo(int id, [FromBody] TodoUpdateDto todoDto)
@@ -65,14 +58,14 @@ namespace TodoList.Controllers
             if (updatedTodo == null)
                 return NotFound();
 
-            return NoContent(); 
+            return Ok(updatedTodo);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodo(int id)
         {
             await _todoService.DeleteTodoAsync(id);
-            return NoContent(); 
+            return NoContent();
         }
     }
 }

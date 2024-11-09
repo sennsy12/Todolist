@@ -2,61 +2,68 @@
 using TodoList.Models;
 using TodoList.Repositories;
 
-namespace TodoList.Services;
-
-public class TodoService : ITodoService
+namespace TodoList.Services
 {
-    private readonly ITodoRepository _todoRepository;
-
-    public TodoService(ITodoRepository todoRepository)
+    public class TodoService : ITodoService
     {
-        _todoRepository = todoRepository;
-    }
+        private readonly ITodoRepository _todoRepository;
 
-    public async Task<IEnumerable<Todo>> GetAllTodosAsync()
-    {
-        return await _todoRepository.GetAllAsync();
-    }
-
-    public async Task<Todo?> GetTodoByIdAsync(int id)
-    {
-        var todo = await _todoRepository.GetByIdAsync(id);
-        if (todo == null)
-            return null;
-
-        return todo;
-    }
-
-    public async Task<Todo> CreateTodoAsync(TodoCreateDto todoDto)
-    {
-        var todo = new Todo
+        public TodoService(ITodoRepository todoRepository)
         {
-            Title = todoDto.Title,
-            Description = todoDto.Description,
-            IsCompleted = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            _todoRepository = todoRepository;
+        }
 
-        return await _todoRepository.CreateAsync(todo);
-    }
+        public async Task<IEnumerable<Todo>> GetAllTodosAsync()
+        {
+            return await _todoRepository.GetAllAsync();
+        }
 
-    public async Task<Todo> UpdateTodoAsync(int id, TodoUpdateDto todoDto)
-    {
-        var todo = await _todoRepository.GetByIdAsync(id);
-        if (todo == null)
-            return null;
+        public async Task<Todo?> GetTodoByIdAsync(int id)
+        {
+            var todo = await _todoRepository.GetByIdAsync(id);
+            if (todo == null)
+                return null;
 
-        todo.Title = todoDto.Title;
-        todo.Description = todoDto.Description;
-        todo.IsCompleted = todoDto.IsCompleted;
-        todo.UpdatedAt = DateTime.UtcNow;
+            return todo;
+        }
 
-        return await _todoRepository.UpdateAsync(todo);
-    }
+        public async Task<Todo> CreateTodoAsync(TodoCreateDto todoDto)
+        {
+            var todo = new Todo
+            {
+                Title = todoDto.Title,
+                Description = todoDto.Description,
+                IsCompleted = false,
+                Category = todoDto.Category,
+                DueDate = todoDto.DueDate.HasValue ? DateTime.SpecifyKind(todoDto.DueDate.Value, DateTimeKind.Utc) : (DateTime?)null,
+                Priority = todoDto.Priority,
+                CreatedAt = DateTime.UtcNow,  
+                UpdatedAt = DateTime.UtcNow   
+            };
 
-    public async Task DeleteTodoAsync(int id)
-    {
-        await _todoRepository.DeleteAsync(id);
+            return await _todoRepository.CreateAsync(todo);
+        }
+
+        public async Task<Todo> UpdateTodoAsync(int id, TodoUpdateDto todoDto)
+        {
+            var todo = await _todoRepository.GetByIdAsync(id);
+            if (todo == null)
+                return null;
+
+            todo.Title = todoDto.Title;
+            todo.Description = todoDto.Description;
+            todo.IsCompleted = todoDto.IsCompleted;
+            todo.Category = todoDto.Category;
+            todo.DueDate = todoDto.DueDate.HasValue ? DateTime.SpecifyKind(todoDto.DueDate.Value, DateTimeKind.Utc) : (DateTime?)null;
+            todo.Priority = todoDto.Priority;
+            todo.UpdatedAt = DateTime.UtcNow; 
+
+            return await _todoRepository.UpdateAsync(todo);
+        }
+
+        public async Task DeleteTodoAsync(int id)
+        {
+            await _todoRepository.DeleteAsync(id);
+        }
     }
 }

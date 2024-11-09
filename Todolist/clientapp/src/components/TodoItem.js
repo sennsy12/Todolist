@@ -1,6 +1,22 @@
-﻿// components/TodoItem.js
-import React from 'react';
+﻿import React from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'Ingen';
+
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString('no-NO', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
+    const formattedTime = date.toLocaleTimeString('no-NO', {
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+
+    return `${formattedDate}, ${formattedTime}`;
+};
 
 const TodoItem = ({ todo, onEdit, onDelete, onToggleComplete }) => {
     return (
@@ -13,6 +29,15 @@ const TodoItem = ({ todo, onEdit, onDelete, onToggleComplete }) => {
                         </Card.Title>
                         <Card.Text className="text-secondary">
                             {todo.description}
+                        </Card.Text>
+                        <Card.Text className="text-muted">
+                            <strong>Kategori:</strong> {todo.category || 'Ingen'}
+                        </Card.Text>
+                        <Card.Text className="text-muted">
+                            <strong>Forfallsdato:</strong> {formatDate(todo.dueDate)}
+                        </Card.Text>
+                        <Card.Text className="text-muted">
+                            <strong>Prioritet:</strong> {todo.priority}
                         </Card.Text>
                     </div>
                     <Badge bg={todo.isCompleted ? 'success' : 'warning'}>

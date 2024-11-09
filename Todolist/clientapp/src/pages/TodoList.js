@@ -99,13 +99,19 @@ const TodoList = () => {
                             <Alert variant="info">Ingen oppgaver tilgjengelig. Legg til din første oppgave!</Alert>
                         ) : (
                             todos.map(todo => (
-                                <TodoItem
-                                    key={todo.id}
-                                    todo={todo}
-                                    onEdit={handleEditTodo}
-                                    onDelete={handleDeleteTodo}
-                                    onToggleComplete={handleToggleComplete}
-                                />
+                                todo.id ? (
+                                    <TodoItem
+                                        key={todo.id}
+                                        todo={todo}
+                                        onEdit={handleEditTodo}
+                                        onDelete={handleDeleteTodo}
+                                        onToggleComplete={handleToggleComplete}
+                                    />
+                                ) : (
+                                    <Alert variant="danger" key={Math.random()}>
+                                        En oppgave mangler ID. Sjekk backend.
+                                    </Alert>
+                                )
                             ))
                         )}
                     </div>
