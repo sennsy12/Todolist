@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Row, Col } from 'react-bootstrap';
 
 const TodoForm = ({ initialTodo, onSubmit, loading }) => {
     const [formData, setFormData] = useState({
@@ -7,39 +7,39 @@ const TodoForm = ({ initialTodo, onSubmit, loading }) => {
         description: '',
         isCompleted: false,
         dueDate: '',  
-        category: '',  
-        priority: 'Low'  
+        dueTime: '',  
+        category: '',
+        priority: 'Low'
     });
-
-    const formatInputDate = (dateString) => {
-        if (!dateString) return '';  
-        const date = new Date(dateString);
-        return date.toISOString().split('T')[0];  
-    };
-
-    useEffect(() => {
-        if (initialTodo) {
-            setFormData({
-                ...initialTodo,
-                dueDate: formatInputDate(initialTodo.dueDate) 
-            });
-        }
-    }, [initialTodo]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const dueDateUTC = formData.dueDate ? new Date(formData.dueDate).toISOString() : null;
+
+        const dueDateTime = formData.dueDate && formData.dueTime
+            ? new Date(`${formData.dueDate}T${formData.dueTime}:00`)
+            : null;
 
         onSubmit({
             ...formData,
-            dueDate: dueDateUTC
+            dueDateTime: dueDateTime ? dueDateTime.toISOString() : null  
         });
 
         if (!initialTodo) {
-            setFormData({ title: '', description: '', isCompleted: false, dueDate: '', category: '', priority: 'Low' });
+            setFormData({ title: '', description: '', isCompleted: false, dueDate: '', dueTime: '', category: '', priority: 'Low' });
         }
     };
+
+    useEffect(() => {
+        if (initialTodo) {
+            const dueDateTime = initialTodo.dueDateTime ? new Date(initialTodo.dueDateTime) : null;
+            setFormData({
+                ...initialTodo,
+                dueDate: dueDateTime ? dueDateTime.toISOString().split('T')[0] : '',  
+                dueTime: dueDateTime ? dueDateTime.toTimeString().split(' ')[0].substring(0, 5) : ''  
+            });
+        }
+    }, [initialTodo]);
 
     return (
         <Form onSubmit={handleSubmit}>
@@ -64,14 +64,30 @@ const TodoForm = ({ initialTodo, onSubmit, loading }) => {
                     placeholder="Skriv inn oppgavebeskrivelse"
                 />
             </Form.Group>
-            <Form.Group className="mb-3">
-                <Form.Label>Forfallsdato</Form.Label>
-                <Form.Control
-                    type="date"
-                    value={formData.dueDate}
-                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                />
-            </Form.Group>
+
+            <Row className="mb-3">
+                <Col>
+                    <Form.Group>
+                        <Form.Label>Forfallsdato</Form.Label>
+                        <Form.Control
+                            type="date"
+                            value={formData.dueDate}
+                            onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                        />
+                    </Form.Group>
+                </Col>
+                <Col>
+                    <Form.Group>
+                        <Form.Label>Forfallstid</Form.Label>
+                        <Form.Control
+                            type="time"
+                            value={formData.dueTime}
+                            onChange={(e) => setFormData({ ...formData, dueTime: e.target.value })}
+                        />
+                    </Form.Group>
+                </Col>
+            </Row>
+
             <Form.Group className="mb-3">
                 <Form.Label>Kategori</Form.Label>
                 <Form.Control

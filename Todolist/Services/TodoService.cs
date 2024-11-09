@@ -35,10 +35,10 @@ namespace TodoList.Services
                 Description = todoDto.Description,
                 IsCompleted = false,
                 Category = todoDto.Category,
-                DueDate = todoDto.DueDate.HasValue ? DateTime.SpecifyKind(todoDto.DueDate.Value, DateTimeKind.Utc) : (DateTime?)null,
+                DueDateTime = todoDto.DueDateTime,  
                 Priority = todoDto.Priority,
-                CreatedAt = DateTime.UtcNow,  
-                UpdatedAt = DateTime.UtcNow   
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             return await _todoRepository.CreateAsync(todo);
@@ -54,9 +54,9 @@ namespace TodoList.Services
             todo.Description = todoDto.Description;
             todo.IsCompleted = todoDto.IsCompleted;
             todo.Category = todoDto.Category;
-            todo.DueDate = todoDto.DueDate.HasValue ? DateTime.SpecifyKind(todoDto.DueDate.Value, DateTimeKind.Utc) : (DateTime?)null;
+            todo.DueDateTime = todoDto.DueDateTime;  
             todo.Priority = todoDto.Priority;
-            todo.UpdatedAt = DateTime.UtcNow; 
+            todo.UpdatedAt = DateTime.UtcNow;
 
             return await _todoRepository.UpdateAsync(todo);
         }
