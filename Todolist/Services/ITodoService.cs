@@ -5,10 +5,10 @@ namespace TodoList.Services
 {
     public interface ITodoService
     {
-        Task<IEnumerable<Todo>> GetAllTodosAsync();
-        Task<Todo> GetTodoByIdAsync(int id);
-        Task<Todo> CreateTodoAsync(TodoCreateDto todoDto);
-        Task<Todo> UpdateTodoAsync(int id, TodoUpdateDto todoDto);
-        Task DeleteTodoAsync(int id);
+        Task<IEnumerable<Todo>> GetAllTodosForUserAsync(int userId);
+        Task<Todo?> GetTodoByIdForUserAsync(int id, int userId);
+        Task<Todo> CreateTodoForUserAsync(TodoCreateDto todoDto, int userId);
+        Task<Todo?> UpdateTodoForUserAsync(int id, TodoUpdateDto todoDto, int userId);
+        Task DeleteTodoForUserAsync(int id, int userId);
     }
 }

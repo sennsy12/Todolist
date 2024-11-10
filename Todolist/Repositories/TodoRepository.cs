@@ -2,48 +2,50 @@
 using TodoList.Data;
 using TodoList.Models;
 
-namespace TodoList.Repositories;
-
-public class TodoRepository : ITodoRepository
+namespace TodoList.Repositories
 {
-    private readonly ApplicationDbContext _context;
-
-    public TodoRepository(ApplicationDbContext context)
+    public class TodoRepository : ITodoRepository
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    public async Task<IEnumerable<Todo>> GetAllAsync()
-    {
-        return await _context.Todos.ToListAsync();
-    }
-
-    public async Task<Todo> GetByIdAsync(int id)
-    {
-        return await _context.Todos.FindAsync(id);
-    }
-
-    public async Task<Todo> CreateAsync(Todo todo)
-    {
-        _context.Todos.Add(todo);
-        await _context.SaveChangesAsync();
-        return todo;
-    }
-
-    public async Task<Todo> UpdateAsync(Todo todo)
-    {
-        _context.Entry(todo).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        return todo;
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var todo = await _context.Todos.FindAsync(id);
-        if (todo != null)
+        public TodoRepository(ApplicationDbContext context)
         {
-            _context.Todos.Remove(todo);
+            _context = context;
+        }
+
+        public async Task<IEnumerable<Todo>> GetAllForUserAsync(int userId)
+        {
+            return await _context.Todos.Where(t => t.UserId == userId).ToListAsync();
+        }
+
+        public async Task<Todo?> GetByIdForUserAsync(int id, int userId)
+        {
+            return await _context.Todos.SingleOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+        }
+
+        public async Task<Todo> CreateAsync(Todo todo)
+        {
+            _context.Todos.Add(todo);
             await _context.SaveChangesAsync();
+            return todo;
+        }
+
+        public async Task<Todo> UpdateAsync(Todo todo)
+        {
+            _context.Entry(todo).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return todo;
+        }
+
+        public async Task DeleteForUserAsync(int id, int userId)
+        {
+            var todo = await GetByIdForUserAsync(id, userId);
+
+            if (todo != null)
+            {
+                _context.Todos.Remove(todo);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

@@ -13,21 +13,17 @@ namespace TodoList.Services
             _todoRepository = todoRepository;
         }
 
-        public async Task<IEnumerable<Todo>> GetAllTodosAsync()
+        public async Task<IEnumerable<Todo>> GetAllTodosForUserAsync(int userId)
         {
-            return await _todoRepository.GetAllAsync();
+            return await _todoRepository.GetAllForUserAsync(userId);
         }
 
-        public async Task<Todo?> GetTodoByIdAsync(int id)
+        public async Task<Todo?> GetTodoByIdForUserAsync(int id, int userId)
         {
-            var todo = await _todoRepository.GetByIdAsync(id);
-            if (todo == null)
-                return null;
-
-            return todo;
+            return await _todoRepository.GetByIdForUserAsync(id, userId);
         }
 
-        public async Task<Todo> CreateTodoAsync(TodoCreateDto todoDto)
+        public async Task<Todo> CreateTodoForUserAsync(TodoCreateDto todoDto, int userId)
         {
             var todo = new Todo
             {
@@ -35,35 +31,37 @@ namespace TodoList.Services
                 Description = todoDto.Description,
                 IsCompleted = false,
                 Category = todoDto.Category,
-                DueDateTime = todoDto.DueDateTime,  
+                DueDateTime = todoDto.DueDateTime,
                 Priority = todoDto.Priority,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                UserId = userId 
             };
 
             return await _todoRepository.CreateAsync(todo);
         }
 
-        public async Task<Todo> UpdateTodoAsync(int id, TodoUpdateDto todoDto)
+        public async Task<Todo?> UpdateTodoForUserAsync(int id, TodoUpdateDto todoDto, int userId)
         {
-            var todo = await _todoRepository.GetByIdAsync(id);
-            if (todo == null)
+            var existingTodo = await _todoRepository.GetByIdForUserAsync(id, userId);
+
+            if (existingTodo == null)
                 return null;
 
-            todo.Title = todoDto.Title;
-            todo.Description = todoDto.Description;
-            todo.IsCompleted = todoDto.IsCompleted;
-            todo.Category = todoDto.Category;
-            todo.DueDateTime = todoDto.DueDateTime;  
-            todo.Priority = todoDto.Priority;
-            todo.UpdatedAt = DateTime.UtcNow;
+            existingTodo.Title = todoDto.Title;
+            existingTodo.Description = todoDto.Description;
+            existingTodo.IsCompleted = todoDto.IsCompleted;
+            existingTodo.Category = todoDto.Category;
+            existingTodo.DueDateTime = todoDto.DueDateTime;
+            existingTodo.Priority = todoDto.Priority;
+            existingTodo.UpdatedAt = DateTime.UtcNow;
 
-            return await _todoRepository.UpdateAsync(todo);
+            return await _todoRepository.UpdateAsync(existingTodo);
         }
 
-        public async Task DeleteTodoAsync(int id)
+        public async Task DeleteTodoForUserAsync(int id, int userId)
         {
-            await _todoRepository.DeleteAsync(id);
+            await _todoRepository.DeleteForUserAsync(id, userId);
         }
     }
 }

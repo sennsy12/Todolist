@@ -1,4 +1,4 @@
-﻿namespace TodoList.Models;
+﻿using TodoList.Models;
 
 public class Todo
 {
@@ -7,8 +7,12 @@ public class Todo
     public string Description { get; set; }
     public bool IsCompleted { get; set; }
     public string Category { get; set; }
-    public DateTime? DueDateTime { get; set; }  
+    public DateTime? DueDateTime { get; set; }
     public string Priority { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // Fremmednøkkel til bruker:
+    public int UserId { get; set; }
+    public User User { get; set; }
 }

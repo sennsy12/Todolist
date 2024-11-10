@@ -1,71 +1,108 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TodoList.DTOs;
 using TodoList.Models;
 using TodoList.Services;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging; // Legg til denne
 
 namespace TodoList.Controllers
 {
-    [Route("Todo")]
-    public class TodoController : Controller
+    [Authorize]
+    [Route("api/todos")]
+    [ApiController]
+    public class TodoController : ControllerBase
     {
         private readonly ITodoService _todoService;
+        private readonly ILogger<TodoController> _logger; // Legg til denne
 
-        public TodoController(ITodoService todoService)
+        public TodoController(ITodoService todoService, ILogger<TodoController> logger) // Oppdater constructor
         {
             _todoService = todoService;
+            _logger = logger;
+        }
+
+        [HttpGet("user-todos")]
+        public async Task<ActionResult<IEnumerable<Todo>>> GetAllTodosForUser()
+        {
+            try
+            {
+                var authHeader = Request.Headers["Authorization"].ToString();
+
+                var userId = GetUserIdFromToken();
+
+                var todos = await _todoService.GetAllTodosForUserAsync(userId);
+
+                return Ok(todos);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
 
-        [HttpGet("api")]
-        public async Task<ActionResult<IEnumerable<Todo>>> GetAllTodos()
+        // Henter en spesifikk todo for den innloggede brukeren
+        [HttpGet("user-todos/{id}")]  
+        public async Task<ActionResult<Todo>> GetTodoById(int id)
         {
-            var todos = await _todoService.GetAllTodosAsync();
-            return Ok(todos);
-        }
+            var userId = GetUserIdFromToken();
+            var todo = await _todoService.GetTodoByIdForUserAsync(id, userId);
 
-        // Get a specific todo by ID
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Todo>> GetTodo(int id)
-        {
-            var todo = await _todoService.GetTodoByIdAsync(id);
             if (todo == null)
                 return NotFound();
 
             return Ok(todo);
         }
 
-        [HttpPost("api/todo")]
+        // Oppretter en ny todo for den innloggede brukeren
+        [HttpPost("create")]  
         public async Task<IActionResult> CreateTodo([FromBody] TodoCreateDto todoDto)
         {
+            var userId = GetUserIdFromToken();
             try
             {
-                var newTodo = await _todoService.CreateTodoAsync(todoDto);
+                var newTodo = await _todoService.CreateTodoForUserAsync(todoDto, userId);
                 return Ok(newTodo);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Feil ved oppretting av Todo: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPut("{id}")]
+        // Oppdaterer en eksisterende todo for den innloggede brukeren
+        [HttpPut("update/{id}")]  
         public async Task<IActionResult> UpdateTodo(int id, [FromBody] TodoUpdateDto todoDto)
         {
-            var updatedTodo = await _todoService.UpdateTodoAsync(id, todoDto);
+            var userId = GetUserIdFromToken();
+            var updatedTodo = await _todoService.UpdateTodoForUserAsync(id, todoDto, userId);
+
             if (updatedTodo == null)
                 return NotFound();
 
             return Ok(updatedTodo);
         }
 
-        [HttpDelete("{id}")]
+        // Sletter en todo for den innloggede brukeren
+        [HttpDelete("delete/{id}")]  
         public async Task<IActionResult> DeleteTodo(int id)
         {
-            await _todoService.DeleteTodoAsync(id);
+            var userId = GetUserIdFromToken();
+            await _todoService.DeleteTodoForUserAsync(id, userId);
             return NoContent();
+        }
+
+        // Hjelpemetode for å hente bruker-ID fra JWT-tokenet
+        private int GetUserIdFromToken()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                throw new UnauthorizedAccessException("Bruker-ID ikke funnet i token");
+            }
+            return int.Parse(userIdClaim.Value);
         }
     }
 }
