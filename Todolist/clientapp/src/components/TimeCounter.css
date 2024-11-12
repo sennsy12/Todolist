@@ -1,0 +1,84 @@
+﻿/* components/TimeCounter.css */
+.time-counter {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.time-segments {
+    display: flex;
+    gap: 4px;
+}
+
+.time-counter.normal {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.time-counter.warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.time-counter.critical {
+    background-color: #f8d7da;
+    color: #721c24;
+    animation: pulse 2s infinite;
+}
+
+.time-counter.expired {
+    background-color: #dc3545;
+    color: white;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.todo-accordion-item {
+    margin-bottom: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.todo-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.todo-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+}
+
+.todo-category {
+    background-color: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.completed-badge {
+    background-color: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
