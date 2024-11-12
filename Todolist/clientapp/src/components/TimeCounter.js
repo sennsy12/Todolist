@@ -30,7 +30,7 @@ const TimeCounter = ({ dueDateTime }) => {
 
             setTimeLeft({ days, hours, minutes, seconds });
 
-            // Sett status basert på gjenværende tid
+            // status basert på gjenværende tid
             if (days === 0 && hours < 24) {
                 setStatus(hours < 2 ? 'critical' : 'warning');
             }
