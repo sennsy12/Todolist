@@ -18,7 +18,7 @@
         return data;
     } catch (error) {
         console.error('Error logging in:', error);
-        throw error; // Kaster feilen videre slik at den kan håndteres i `LoginPage`
+        throw error; 
     }
 };
 
@@ -28,15 +28,27 @@ export const registerUser = async (credentials) => {
     try {
         const response = await fetch('http://localhost:5121/api/auth/register', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(credentials),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                username: credentials.username,
+                email: credentials.email,
+                password: credentials.password
+            })
         });
 
-        if (!response.ok) throw new Error('Registrering mislyktes');
+        const responseData = await response.text();
 
-        return await response.json();
+        if (!response.ok) {
+            throw new Error(responseData);
+        }
+
+        return JSON.parse(responseData);
     } catch (error) {
-        console.error('Error registering user:', error);
+        console.error('Registreringsfeil:', error);
+        throw error;
     }
 };
 

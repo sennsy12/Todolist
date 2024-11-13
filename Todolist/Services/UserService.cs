@@ -27,13 +27,19 @@ namespace TodoList.Services
             var user = new User
             {
                 Username = userDto.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password)
+                Email = userDto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
+                Role = "User",
+                ResetToken = "",  
+                ResetTokenExpires = null
             };
 
             await _userRepository.CreateUserAsync(user);
 
             return GenerateJwtToken(user);
         }
+
+
 
         public async Task<AuthResponseDto> LoginAsync(UserLoginDto userDto)
         {
@@ -60,10 +66,11 @@ namespace TodoList.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Role, user.Role)
-                }),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
+        }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -77,6 +84,7 @@ namespace TodoList.Services
                 Role = user.Role
             };
         }
+
     }
 }
 

@@ -4,7 +4,7 @@ using System.Security.Claims;
 using TodoList.DTOs;
 using TodoList.Models;
 using TodoList.Services;
-using Microsoft.Extensions.Logging; // Legg til denne
+
 
 namespace TodoList.Controllers
 {
@@ -14,9 +14,9 @@ namespace TodoList.Controllers
     public class TodoController : ControllerBase
     {
         private readonly ITodoService _todoService;
-        private readonly ILogger<TodoController> _logger; // Legg til denne
+        private readonly ILogger<TodoController> _logger; 
 
-        public TodoController(ITodoService todoService, ILogger<TodoController> logger) // Oppdater constructor
+        public TodoController(ITodoService todoService, ILogger<TodoController> logger) 
         {
             _todoService = todoService;
             _logger = logger;

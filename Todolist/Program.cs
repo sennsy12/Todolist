@@ -36,6 +36,8 @@ builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 
 // JWT konfigurasjon
 var secretKey = builder.Configuration["Jwt:SecretKey"];

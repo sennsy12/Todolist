@@ -1,28 +1,34 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { registerUser } from '../handlers/AuthHandler';
-import { useNavigate } from 'react-router-dom';
-import { Button, Form, Container, Row, Col, Alert, Card } from 'react-bootstrap';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Form, Button, Container, Row, Col, Alert, Card } from 'react-bootstrap';
+import { resetPassword } from '../handlers/ResetPasswordHandler';
 
-const RegisterPage = () => {
-    const [credentials, setCredentials] = useState({
-        username: '',
+const ResetPasswordPage = () => {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
         email: '',
-        password: ''
+        newPassword: '',
+        confirmPassword: ''
     });
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.newPassword !== formData.confirmPassword) {
+            setError('Passordene samsvarer ikke');
+            return;
+        }
 
         try {
-            await registerUser(credentials);
-            setSuccess('Registreringen var vellykket!');
+            const token = searchParams.get('token');
+            await resetPassword(formData.email, token, formData.newPassword);
+            setSuccess('Passordet ditt har blitt oppdatert!');
             setError(null);
             setTimeout(() => navigate('/login'), 60000); 
         } catch (err) {
-            setError('Registrering mislyktes');
+            setError(err.message);
             setSuccess(null);
         }
     };
@@ -40,7 +46,7 @@ const RegisterPage = () => {
                 <Col md={6} lg={4} className="mx-auto">
                     <Card>
                         <Card.Body>
-                            <h3 className="text-center mb-4">Registrer deg</h3>
+                            <h3 className="text-center mb-4">Sett nytt passord</h3>
                             {error && <Alert variant="danger">{error}</Alert>}
                             {success && (
                                 <Alert variant="success">
@@ -56,43 +62,37 @@ const RegisterPage = () => {
                                 </Alert>
                             )}
                             <Form onSubmit={handleSubmit}>
-                                <Form.Group controlId="formUsername" className="mb-3">
-                                    <Form.Label>Brukernavn</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Brukernavn"
-                                        value={credentials.username}
-                                        onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                                    />
-                                </Form.Group>
-
-                                <Form.Group controlId="formPassword" className="mb-3">
-                                    <Form.Label>Passord</Form.Label>
-                                    <Form.Control
-                                        type="password"
-                                        placeholder="Passord"
-                                        value={credentials.password}
-                                        onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="formEmail" className="mb-3">
+                                <Form.Group className="mb-3">
                                     <Form.Label>E-post</Form.Label>
                                     <Form.Control
                                         type="email"
-                                        placeholder="Skriv inn e-post"
-                                        value={credentials.email}
-                                        onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         required
                                     />
                                 </Form.Group>
-
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Nytt passord</Form.Label>
+                                    <Form.Control
+                                        type="password"
+                                        value={formData.newPassword}
+                                        onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Bekreft nytt passord</Form.Label>
+                                    <Form.Control
+                                        type="password"
+                                        value={formData.confirmPassword}
+                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
                                 <Button variant="primary" type="submit" className="w-100">
-                                    Registrer
+                                    Oppdater passord
                                 </Button>
                             </Form>
-                            <div className="text-center mt-3">
-                                <p>Allerede en konto? <Button variant="link" onClick={() => navigate('/login')}>Logg inn her</Button></p>
-                            </div>
                         </Card.Body>
                     </Card>
                 </Col>
@@ -101,4 +101,4 @@ const RegisterPage = () => {
     );
 };
 
-export default RegisterPage;
+export default ResetPasswordPage;
