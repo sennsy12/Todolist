@@ -8,34 +8,25 @@ const Header = () => {
 
     const handleLogout = () => {
         logoutUser();
-        navigate('/login');
+        navigate('/login'); // Send brukeren til innloggingssiden etter utlogging
     };
 
     return (
         <Navbar bg="dark" variant="dark" expand="lg">
             <Container>
                 <Navbar.Brand href="/">Todo App</Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="me-auto">
-                        {localStorage.getItem('token') && (
-                            <>
-                                <Nav.Link href="/todos">Personal Todos</Nav.Link>
-                                <Nav.Link href="/todo-lists">Shared Lists</Nav.Link>
-                            </>
-                        )}
-                    </Nav>
-                    <Nav>
-                        {!localStorage.getItem('token') ? (
-                            <>
-                                <Nav.Link href="/login">Logg Inn</Nav.Link>
-                                <Nav.Link href="/register">Registrer</Nav.Link>
-                            </>
-                        ) : (
+                <Nav className="ml-auto">
+                    {!localStorage.getItem('token') ? (
+                        <>
+                            <Nav.Link href="/login">Logg Inn</Nav.Link>
+                            <Nav.Link href="/register">Registrer</Nav.Link>
+                        </>
+                    ) : (
+                        <>
                             <Nav.Link onClick={handleLogout}>Logg Ut</Nav.Link>
-                        )}
-                    </Nav>
-                </Navbar.Collapse>
+                        </>
+                    )}
+                </Nav>
             </Container>
         </Navbar>
     );

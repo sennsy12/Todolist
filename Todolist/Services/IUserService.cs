@@ -7,7 +7,5 @@ namespace TodoList.Services
     {
         Task<AuthResponseDto> RegisterAsync(UserRegisterDto userDto);
         Task<AuthResponseDto> LoginAsync(UserLoginDto userDto);
-        int GetCurrentUserId();
-        string GetCurrentUserEmail();
     }
 }

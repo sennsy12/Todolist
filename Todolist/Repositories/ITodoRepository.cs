@@ -1,4 +1,4 @@
-﻿using Todolist.Models;
+﻿using TodoList.Models;
 
 namespace TodoList.Repositories
 {
@@ -9,6 +9,5 @@ namespace TodoList.Repositories
         Task<Todo> CreateAsync(Todo todo);
         Task<Todo> UpdateAsync(Todo todo);
         Task DeleteForUserAsync(int id, int userId);
-
     }
 }

@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Todolist.Repositories;
-using Todolist.Services;
 using TodoList.Data;
 using TodoList.Repositories;
 using TodoList.Services;
@@ -40,13 +38,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
-builder.Services.AddScoped<ITodoListRepository, TodoListRepository>();
-builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
-
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-});
 
 // JWT konfigurasjon
 var secretKey = builder.Configuration["Jwt:SecretKey"];
@@ -79,7 +70,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

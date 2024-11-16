@@ -12,13 +12,11 @@ namespace TodoList.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(IUserRepository userRepository, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public UserService(IUserRepository userRepository, IConfiguration configuration)
         {
             _userRepository = userRepository;
             _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<AuthResponseDto> RegisterAsync(UserRegisterDto userDto)
@@ -32,7 +30,7 @@ namespace TodoList.Services
                 Email = userDto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
                 Role = "User",
-                ResetToken = "",
+                ResetToken = "",  
                 ResetTokenExpires = null
             };
 
@@ -40,6 +38,8 @@ namespace TodoList.Services
 
             return GenerateJwtToken(user);
         }
+
+
 
         public async Task<AuthResponseDto> LoginAsync(UserLoginDto userDto)
         {
@@ -58,17 +58,6 @@ namespace TodoList.Services
             return GenerateJwtToken(user);
         }
 
-        public int GetCurrentUserId()
-        {
-            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);
-            return userIdClaim != null ? int.Parse(userIdClaim.Value) : 0;
-        }
-
-        public string GetCurrentUserEmail()
-        {
-            return _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value;
-        }
-
         private AuthResponseDto GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -77,11 +66,11 @@ namespace TodoList.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role)
-                }),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
+        }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -95,5 +84,7 @@ namespace TodoList.Services
                 Role = user.Role
             };
         }
+
     }
 }
+
