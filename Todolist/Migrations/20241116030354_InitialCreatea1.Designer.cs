@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TodoList.Data;
@@ -11,9 +12,11 @@ using TodoList.Data;
 namespace Todolist.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241116030354_InitialCreatea1")]
+    partial class InitialCreatea1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,9 +50,6 @@ namespace Todolist.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("ListTodoId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Priority")
                         .IsRequired()
                         .HasColumnType("text");
@@ -57,6 +57,9 @@ namespace Todolist.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("TodoListId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -66,7 +69,7 @@ namespace Todolist.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ListTodoId");
+                    b.HasIndex("TodoListId");
 
                     b.HasIndex("UserId");
 
@@ -117,10 +120,6 @@ namespace Todolist.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -128,22 +127,12 @@ namespace Todolist.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("DueDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("boolean");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Priority")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -186,15 +175,19 @@ namespace Todolist.Migrations
 
             modelBuilder.Entity("Todo", b =>
                 {
-                    b.HasOne("Todolist.Models.ListTodo", null)
+                    b.HasOne("Todolist.Models.ListTodo", "TodoList")
                         .WithMany("Todos")
-                        .HasForeignKey("ListTodoId");
+                        .HasForeignKey("TodoListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TodoList.Models.User", "User")
                         .WithMany("Todos")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("TodoList");
 
                     b.Navigation("User");
                 });

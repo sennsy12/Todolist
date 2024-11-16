@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TodoList.Data;
 using TodoList.Models;
+using TodoList.Repositories;
 
 namespace TodoList.Repositories
 {
@@ -15,12 +16,15 @@ namespace TodoList.Repositories
 
         public async Task<IEnumerable<Todo>> GetAllForUserAsync(int userId)
         {
-            return await _context.Todos.Where(t => t.UserId == userId).ToListAsync();
+            return await _context.Todos
+                .Where(t => t.UserId == userId)
+                .ToListAsync();
         }
 
         public async Task<Todo?> GetByIdForUserAsync(int id, int userId)
         {
-            return await _context.Todos.SingleOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            return await _context.Todos
+                .SingleOrDefaultAsync(t => t.Id == id && t.UserId == userId);
         }
 
         public async Task<Todo> CreateAsync(Todo todo)
@@ -39,8 +43,8 @@ namespace TodoList.Repositories
 
         public async Task DeleteForUserAsync(int id, int userId)
         {
-            var todo = await GetByIdForUserAsync(id, userId);
-
+            var todo = await _context.Todos
+                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
             if (todo != null)
             {
                 _context.Todos.Remove(todo);
