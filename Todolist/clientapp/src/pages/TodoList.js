@@ -1,196 +1,190 @@
-﻿// TodoList.js
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Alert, Modal, Badge, Form, Button, Pagination } from 'react-bootstrap';
-import TodoItem from '../components/TodoItem';
+﻿import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Button, Alert, Spinner } from 'react-bootstrap';
+import TodoCard from '../components/TodoCard';
 import TodoForm from '../components/TodoForm';
-import TodoAccordion from '../components/TodoAccordion';
-import { fetchTodos, addTodo, updateTodo, deleteTodo } from '../handlers/apiHandler';
-import { useNavigate } from 'react-router-dom';
+import {
+    fetchTodos,
+    createTodo,
+    updateTodo,
+    deleteTodo,
+    addCollaborator,
+    removeCollaborator,
+    addSubTodo,
+    updateSubTodo,
+    deleteSubTodo
+} from '../handlers/todoApiHandlers';
 
 const TodoList = () => {
     const [todos, setTodos] = useState([]);
-    const [editingTodo, setEditingTodo] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const todosPerPage = 10;
-
-    const navigate = useNavigate();
+    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
-        if (!localStorage.getItem('token')) {
-            navigate('/login');
-        } else {
-            loadTodos();
-        }
+        loadTodos();
     }, []);
 
     const loadTodos = async () => {
         try {
             setLoading(true);
+            setError(null);
             const data = await fetchTodos();
-            setTodos(Array.isArray(data) ? data : []);
-        } catch (err) {
-            setError('Kunne ikke laste oppgaver');
+            setTodos(data);
+        } catch (error) {
+            console.error('Error loading todos:', error);
+            setError('Kunne ikke laste oppgaver. Prøv igjen senere.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleAddTodo = async (newTodo) => {
+    const handleCreateTodo = async (todoData) => {
         try {
             setLoading(true);
-            const data = await addTodo(newTodo);
-            setTodos([...todos, data]);
-        } catch (err) {
-            setError('Kunne ikke legge til oppgave');
+            const newTodo = await createTodo(todoData);
+            setTodos([...todos, newTodo]);
+            setShowAddModal(false);
+        } catch (error) {
+            console.error('Error creating todo:', error);
+            setError('Kunne ikke opprette oppgave. Prøv igjen senere.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleEditTodo = (todo) => {
-        setEditingTodo(todo);
-        setShowModal(true);
-    };
-
-    const handleSaveEdit = async (updatedTodo) => {
+    const handleUpdateTodo = async (todoId, updatedData) => {
         try {
             setLoading(true);
-            await updateTodo(updatedTodo);
-            setTodos(todos.map(todo => (todo.id === updatedTodo.id ? updatedTodo : todo)));
-            setShowModal(false);
-        } catch (err) {
-            setError('Kunne ikke oppdatere oppgave');
+            await updateTodo(todoId, updatedData);
+            await loadTodos(); // Oppdater listen etter vellykket oppdatering
+        } catch (error) {
+            console.error('Error updating todo:', error);
+            setError('Kunne ikke oppdatere oppgaven. Prøv igjen senere.');
         } finally {
             setLoading(false);
-            setEditingTodo(null);
         }
     };
 
-    const handleDeleteTodo = async (id) => {
+    const handleDeleteTodo = async (todoId) => {
         try {
-            await deleteTodo(id);
-            setTodos(todos.filter(todo => todo.id !== id));
-        } catch (err) {
-            setError('Kunne ikke slette oppgave');
+            await deleteTodo(todoId);
+            setTodos(todos.filter(todo => todo.id !== todoId));
+        } catch (error) {
+            console.error('Error deleting todo:', error);
+            setError('Kunne ikke slette oppgave. Prøv igjen senere.');
         }
     };
 
-    const handleToggleComplete = async (todo) => {
-        const updatedTodo = { ...todo, isCompleted: !todo.isCompleted };
-        await handleSaveEdit(updatedTodo);
+    const handleAddCollaborator = async (todoId, username) => {
+        try {
+            await addCollaborator(todoId, username);
+            await loadTodos(); // Oppdater listen for å få med nye collaborators
+        } catch (error) {
+            console.error('Error adding collaborator:', error);
+            setError('Kunne ikke legge til samarbeidspartner. Prøv igjen senere.');
+        }
     };
 
-    const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value);
-        setCurrentPage(1);
+    const handleRemoveCollaborator = async (todoId, username) => {
+        try {
+            await removeCollaborator(todoId, username);
+            await loadTodos();
+        } catch (error) {
+            console.error('Error removing collaborator:', error);
+            setError('Kunne ikke fjerne samarbeidspartner. Prøv igjen senere.');
+        }
     };
 
-    const filteredTodos = selectedCategory === ''
-        ? todos
-        : todos.filter(todo => todo.category === selectedCategory);
+    const handleAddSubTodo = async (todoId, text) => {
+        try {
+            await addSubTodo(todoId, text);
+            await loadTodos(); // Laster inn todos på nytt etter endring
+        } catch (error) {
+            console.error('Error adding sub-todo:', error);
+            setError('Kunne ikke legge til deloppgave. Prøv igjen senere.');
+        }
+    };
 
-    const indexOfLastTodo = currentPage * todosPerPage;
-    const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
-    const currentTodos = filteredTodos.slice(indexOfFirstTodo, indexOfLastTodo);
-    const totalPages = Math.ceil(filteredTodos.length / todosPerPage);
+    const handleUpdateSubTodo = async (todoId, subTodoId, updates) => {
+        try {
+            await updateSubTodo(todoId, subTodoId, updates);
+            await loadTodos();
+        } catch (error) {
+            console.error('Error updating sub-todo:', error);
+            setError('Kunne ikke oppdatere deloppgave. Prøv igjen senere.');
+        }
+    };
+
+    const handleDeleteSubTodo = async (todoId, subTodoId) => {
+        try {
+            await deleteSubTodo(todoId, subTodoId);
+            await loadTodos();
+        } catch (error) {
+            console.error('Error deleting sub-todo:', error);
+            setError('Kunne ikke slette deloppgave. Prøv igjen senere.');
+        }
+    };
+
+    if (loading && todos.length === 0) {
+        return (
+            <Container className="d-flex justify-content-center align-items-center min-vh-100">
+                <Spinner animation="border" role="status" variant="primary">
+                    <span className="visually-hidden">Laster...</span>
+                </Spinner>
+            </Container>
+        );
+    }
 
     return (
         <Container className="py-5">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h1>Mine Oppgaver</h1>
+                <Button
+                    variant="primary"
+                    onClick={() => setShowAddModal(true)}
+                >
+                    Ny Oppgave
+                </Button>
+            </div>
+
             {error && (
-                <Alert variant="danger" onClose={() => setError(null)} dismissible>
+                <Alert variant="danger" className="mb-4" onClose={() => setError(null)} dismissible>
                     {error}
                 </Alert>
             )}
 
-            <Row>
-                <Col lg={4} className="mb-4">
-                    <div className="mb-5">
-                        <h2 className="mb-3">Legg til ny oppgave</h2>
-                        <TodoForm
-                            onSubmit={handleAddTodo}
-                            loading={loading}
-                            categories={Array.from(new Set(todos.map(todo => todo.category)))}
+            <Row className="g-4">
+                {todos.map((todo) => (
+                    <Col key={todo.id} xs={12} md={6} lg={4}>
+                        <TodoCard
+                            todo={todo}
+                            onUpdate={(updatedData) => handleUpdateTodo(todo.id, updatedData)}
+                            onDelete={(id) => handleDeleteTodo(id)}
+                            onAddCollaborator={(username) => handleAddCollaborator(todo.id, username)}
+                            onRemoveCollaborator={(username) => handleRemoveCollaborator(todo.id, username)}
+                            onAddSubTodo={(text) => handleAddSubTodo(todo.id, text)}
+                            onUpdateSubTodo={(subTodoId, updates) => handleUpdateSubTodo(todo.id, subTodoId, updates)}
+                            onDeleteSubTodo={(subTodoId) => handleDeleteSubTodo(todo.id, subTodoId)}
+                            onRefresh={loadTodos}
                         />
-                    </div>
-                </Col>
+                    </Col>
+                ))}
 
-                <Col lg={8}>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h1>Oppgaveliste</h1>
-                        <Badge bg="primary">
-                            {todos.length} {todos.length === 1 ? 'oppgave' : 'oppgaver'}
-                        </Badge>
-                    </div>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Kategorier</Form.Label>
-                        <Form.Select
-                            value={selectedCategory}
-                            onChange={handleCategoryChange}
-                        >
-                            <option value="">Alle</option>
-                            {Array.from(new Set(todos.map(todo => todo.category))).map(category => (
-                                <option key={category} value={category}>{category}</option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
-
-                    <TodoAccordion
-                        todos={currentTodos}
-                        onEdit={handleEditTodo}
-                        onDelete={handleDeleteTodo}
-                        onToggleComplete={handleToggleComplete}
-                    />
-
-                    {totalPages > 1 && (
-                        <Pagination className="justify-content-center mt-3">
-                            <Pagination.First
-                                onClick={() => setCurrentPage(1)}
-                                disabled={currentPage === 1}
-                            />
-                            <Pagination.Prev
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                            />
-                            {Array.from({ length: totalPages }, (_, index) => (
-                                <Pagination.Item
-                                    key={index + 1}
-                                    active={index + 1 === currentPage}
-                                    onClick={() => setCurrentPage(index + 1)}
-                                >
-                                    {index + 1}
-                                </Pagination.Item>
-                            ))}
-                            <Pagination.Next
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                            />
-                            <Pagination.Last
-                                onClick={() => setCurrentPage(totalPages)}
-                                disabled={currentPage === totalPages}
-                            />
-                        </Pagination>
-                    )}
-
-                    <Modal show={showModal} onHide={() => setShowModal(false)}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Rediger oppgave</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <TodoForm
-                                initialTodo={editingTodo}
-                                onSubmit={handleSaveEdit}
-                                loading={loading}
-                                categories={Array.from(new Set(todos.map(todo => todo.category)))}
-                            />
-                        </Modal.Body>
-                    </Modal>
-                </Col>
+                {todos.length === 0 && !loading && (
+                    <Col xs={12}>
+                        <Alert variant="info">
+                            Ingen oppgaver funnet. Opprett en ny oppgave for å komme i gang.
+                        </Alert>
+                    </Col>
+                )}
             </Row>
+
+            <TodoForm
+                show={showAddModal}
+                onHide={() => setShowAddModal(false)}
+                onSubmit={handleCreateTodo}
+                loading={loading}
+            />
         </Container>
     );
 };

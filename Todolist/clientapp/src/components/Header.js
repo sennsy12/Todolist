@@ -8,7 +8,7 @@ const Header = () => {
 
     const handleLogout = () => {
         logoutUser();
-        navigate('/login'); // Send brukeren til innloggingssiden etter utlogging
+        navigate('/login');
     };
 
     return (
@@ -23,6 +23,7 @@ const Header = () => {
                         </>
                     ) : (
                         <>
+                            <Nav.Link href="/shared-todos">Delte Todos</Nav.Link>
                             <Nav.Link onClick={handleLogout}>Logg Ut</Nav.Link>
                         </>
                     )}

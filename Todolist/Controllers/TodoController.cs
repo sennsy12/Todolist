@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Todolist.Exceptions;
 using TodoList.DTOs;
 using TodoList.Models;
 using TodoList.Services;
@@ -9,100 +10,137 @@ using TodoList.Services;
 namespace TodoList.Controllers
 {
     [Authorize]
-    [Route("api/todos")]
     [ApiController]
+    [Route("api/todos")]
     public class TodoController : ControllerBase
     {
         private readonly ITodoService _todoService;
-        private readonly ILogger<TodoController> _logger; 
+        private readonly ILogger<TodoController> _logger;
 
-        public TodoController(ITodoService todoService, ILogger<TodoController> logger) 
+        public TodoController(ITodoService todoService, ILogger<TodoController> logger)
         {
             _todoService = todoService;
             _logger = logger;
         }
 
-        [HttpGet("user-todos")]
-        public async Task<ActionResult<IEnumerable<Todo>>> GetAllTodosForUser()
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<TodoResponseDto>>> GetAllTodos()
         {
             try
             {
-                var authHeader = Request.Headers["Authorization"].ToString();
-
-                var userId = GetUserIdFromToken();
-
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 var todos = await _todoService.GetAllTodosForUserAsync(userId);
-
                 return Ok(todos);
             }
             catch (Exception ex)
             {
-
-                return StatusCode(500, new { error = ex.Message });
+                _logger.LogError(ex, "Feil ved henting av todos");
+                return StatusCode(500, "En intern feil oppstod");
             }
         }
 
-
-        // Henter en spesifikk todo for den innloggede brukeren
-        [HttpGet("user-todos/{id}")]  
-        public async Task<ActionResult<Todo>> GetTodoById(int id)
+        [HttpGet("shared")]
+        public async Task<ActionResult<IEnumerable<TodoResponseDto>>> GetSharedTodos()
         {
-            var userId = GetUserIdFromToken();
-            var todo = await _todoService.GetTodoByIdForUserAsync(id, userId);
-
-            if (todo == null)
-                return NotFound();
-
-            return Ok(todo);
-        }
-
-        // Oppretter en ny todo for den innloggede brukeren
-        [HttpPost("create")]  
-        public async Task<IActionResult> CreateTodo([FromBody] TodoCreateDto todoDto)
-        {
-            var userId = GetUserIdFromToken();
             try
             {
-                var newTodo = await _todoService.CreateTodoForUserAsync(todoDto, userId);
-                return Ok(newTodo);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var todos = await _todoService.GetSharedTodosAsync(userId);
+                return Ok(todos);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogError(ex, "Feil ved henting av delte todos");
+                return StatusCode(500, "En intern feil oppstod");
             }
         }
 
-        // Oppdaterer en eksisterende todo for den innloggede brukeren
-        [HttpPut("update/{id}")]  
-        public async Task<IActionResult> UpdateTodo(int id, [FromBody] TodoUpdateDto todoDto)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TodoResponseDto>> GetTodoById(int id)
         {
-            var userId = GetUserIdFromToken();
-            var updatedTodo = await _todoService.UpdateTodoForUserAsync(id, todoDto, userId);
-
-            if (updatedTodo == null)
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var todo = await _todoService.GetTodoByIdForUserAsync(id, userId);
+                return Ok(todo);
+            }
+            catch (NotFoundException)
+            {
                 return NotFound();
-
-            return Ok(updatedTodo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Feil ved henting av todo");
+                return StatusCode(500, "En intern feil oppstod");
+            }
         }
 
-        // Sletter en todo for den innloggede brukeren
-        [HttpDelete("delete/{id}")]  
+        [HttpPost("create")]
+        public async Task<ActionResult<TodoResponseDto>> CreateTodo([FromBody] TodoCreateDto dto)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var todo = await _todoService.CreateTodoForUserAsync(dto, userId);
+                return CreatedAtAction(nameof(GetTodoById), new { id = todo.Id }, todo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Feil ved opprettelse av todo");
+                return StatusCode(500, "En intern feil oppstod");
+            }
+        }
+
+        [HttpPut("update/{id}")]
+        public async Task<ActionResult<TodoResponseDto>> UpdateTodo(int id, [FromBody] TodoUpdateDto dto)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var todo = await _todoService.UpdateTodoForUserAsync(id, dto, userId);
+
+                if (todo == null)
+                    return NotFound("Todo not found or you don't have permission to update it");
+
+                return Ok(todo);
+            }
+            catch (NotFoundException)
+            {
+                return NotFound("Todo not found");
+            }
+            catch (Todolist.Exceptions.UnauthorizedAccessException)
+            {
+                return Forbid("You don't have permission to update this todo");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating todo");
+                return StatusCode(500, "An internal error occurred while updating the todo");
+            }
+        }
+
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteTodo(int id)
         {
-            var userId = GetUserIdFromToken();
-            await _todoService.DeleteTodoForUserAsync(id, userId);
-            return NoContent();
-        }
-
-        // Hjelpemetode for å hente bruker-ID fra JWT-tokenet
-        private int GetUserIdFromToken()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            try
             {
-                throw new UnauthorizedAccessException("Bruker-ID ikke funnet i token");
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                await _todoService.DeleteTodoForUserAsync(id, userId);
+                return NoContent();
             }
-            return int.Parse(userIdClaim.Value);
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Todolist.Exceptions.UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Feil ved sletting av todo");
+                return StatusCode(500, "En intern feil oppstod");
+            }
         }
     }
 }

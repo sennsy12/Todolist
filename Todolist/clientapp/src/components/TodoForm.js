@@ -1,13 +1,13 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import { Form, Button, Row, Col, Modal } from 'react-bootstrap';
 
-const TodoForm = ({ initialTodo, onSubmit, loading }) => {
+const TodoForm = ({ initialTodo, onSubmit, loading, show, onHide }) => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         isCompleted: false,
-        dueDate: '',  
-        dueTime: '',  
+        dueDate: '',
+        dueTime: '',
         category: '',
         priority: 'Low'
     });
@@ -15,19 +15,31 @@ const TodoForm = ({ initialTodo, onSubmit, loading }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-
-        const dueDateTime = formData.dueDate && formData.dueTime
-            ? new Date(`${formData.dueDate}T${formData.dueTime}:00`)
-            : null;
-
-        onSubmit({
+        const formattedData = {
             ...formData,
-            dueDateTime: dueDateTime ? dueDateTime.toISOString() : null  
-        });
+            dueDateTime: formData.dueDate && formData.dueTime
+                ? new Date(`${formData.dueDate}T${formData.dueTime}`).toISOString()
+                : null
+        };
 
-        if (!initialTodo) {
-            setFormData({ title: '', description: '', isCompleted: false, dueDate: '', dueTime: '', category: '', priority: 'Low' });
-        }
+        onSubmit(formattedData);
+    };
+
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
+
+    const predefinedCategories = [
+        { value: 'Arbeid', label: 'Arbeid 💼' },
+        { value: 'Personlig', label: 'Personlig 🏠' },
+        { value: 'Studie', label: 'Studie 📚' },
+        { value: 'Trening', label: 'Trening 🏃' },
+        { value: 'Møte', label: 'Møte 👥' },
+        { value: 'Annet', label: 'Annet (Egendefinert) 📌' }
+    ];
+
+    const handleCategoryChange = (e) => {
+        const selectedValue = e.target.value;
+        setIsCustomCategory(selectedValue === 'annet');
+        setFormData({ ...formData, category: selectedValue });
     };
 
     useEffect(() => {
@@ -42,6 +54,11 @@ const TodoForm = ({ initialTodo, onSubmit, loading }) => {
     }, [initialTodo]);
 
     return (
+        <Modal show={show} onHide={onHide} centered>
+            <Modal.Header closeButton>
+                <Modal.Title>{initialTodo ? 'Oppdater Oppgave' : 'Ny Oppgave'}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
         <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
                 <Form.Label>Tittel</Form.Label>
@@ -88,15 +105,30 @@ const TodoForm = ({ initialTodo, onSubmit, loading }) => {
                 </Col>
             </Row>
 
-            <Form.Group className="mb-3">
-                <Form.Label>Kategori</Form.Label>
-                <Form.Control
-                    type="text"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="Skriv inn kategori"
-                />
-            </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Kategori</Form.Label>
+                        <Form.Select
+                            value={formData.category}
+                            onChange={handleCategoryChange}
+                            className="mb-2"
+                        >
+                            <option value="">Velg kategori</option>
+                            {predefinedCategories.map(cat => (
+                                <option key={cat.value} value={cat.value}>
+                                    {cat.label}
+                                </option>
+                            ))}
+                        </Form.Select>
+
+                        {isCustomCategory && (
+                            <Form.Control
+                                type="text"
+                                value={formData.customCategory}
+                                onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+                                placeholder="Skriv inn egendefinert kategori"
+                            />
+                        )}
+                    </Form.Group>
 
             <Form.Group className="mb-3">
                 <Form.Label>Prioritet</Form.Label>
@@ -110,15 +142,17 @@ const TodoForm = ({ initialTodo, onSubmit, loading }) => {
                 </Form.Select>
             </Form.Group>
 
-            <Button
-                variant="primary"
-                type="submit"
-                disabled={loading}
-                className="w-100"
-            >
-                {loading ? 'Lagrer...' : (initialTodo ? 'Oppdater oppgave' : 'Legg til oppgave')}
-            </Button>
-        </Form>
+                    <Button
+                        variant="primary"
+                        type="submit"
+                        disabled={loading}
+                        className="w-100"
+                    >
+                        {loading ? 'Lagrer...' : (initialTodo ? 'Oppdater oppgave' : 'Legg til oppgave')}
+                    </Button>
+                </Form>
+            </Modal.Body>
+        </Modal>
     );
 };
 
