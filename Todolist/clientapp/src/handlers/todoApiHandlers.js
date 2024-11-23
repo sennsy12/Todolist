@@ -135,16 +135,20 @@ export const addCollaborator = async (todoId, username) => {
 export const removeCollaborator = async (todoId, username) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/${todoId}/collaborators/remove/${username}`, {
+        const response = await fetch(`http://localhost:5121/api/collaborators/${todoId}/remove/${username}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
-        if (!response.ok) throw new Error('Failed to remove collaborator');
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Kunne ikke fjerne samarbeidspartner');
+        }
     } catch (error) {
-        console.error('Error removing collaborator:', error);
+        console.error('Feil ved fjerning av samarbeidspartner:', error);
         throw error;
     }
 };

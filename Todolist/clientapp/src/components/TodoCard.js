@@ -41,6 +41,8 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
         }
     };
 
+
+
     const handleAddCollaborator = async () => {
         if (!newCollaborator.trim()) {
             setFeedbackMessage('Vennligst skriv inn et gyldig brukernavn.');
@@ -71,9 +73,19 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
     const handleRemoveCollaborator = async (username) => {
         try {
             await removeCollaborator(todo.id, username);
-            onUpdate();
+            if (onRefresh) {
+                await onRefresh();
+            } else {
+                const updatedTodo = {
+                    ...todo,
+                    collaboratorUsernames: todo.collaboratorUsernames.filter(u => u !== username)
+                };
+                onUpdate(updatedTodo);
+            }
+            setFeedbackMessage('Samarbeidspartner ble fjernet');
         } catch (error) {
-            console.error('Error removing collaborator:', error);
+            console.error('Feil ved fjerning av samarbeidspartner:', error);
+            setFeedbackMessage('Kunne ikke fjerne samarbeidspartner');
         }
     };
 
@@ -107,29 +119,24 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
     const handleToggleSubTodo = async (subTodoId, isCompleted) => {
         try {
             const existingSubTodo = todo.subTodos.find(st => st.id === subTodoId);
-            await updateSubTodo(todo.id, subTodoId, {
-                isCompleted: !isCompleted,
-                text: existingSubTodo.text  
+
+            // Kall eksisterende UpdateSubTaskAsync endpoint
+            const updatedSubTodo = await updateSubTodo(todo.id, subTodoId, {
+                text: existingSubTodo.text,
+                isCompleted: !isCompleted
             });
 
+            // Oppdater UI med responsen fra serveren
             const updatedTodo = {
                 ...todo,
                 subTodos: todo.subTodos.map(st =>
-                    st.id === subTodoId
-                        ? {
-                            id: st.id,
-                            text: st.text,
-                            isCompleted: !isCompleted,
-                            ...st,
-                            isCompleted: !isCompleted
-                        }
-                        : st
+                    st.id === subTodoId ? updatedSubTodo : st
                 )
             };
 
             onUpdate(updatedTodo);
         } catch (error) {
-            console.error('Error updating sub-todo:', error);
+            console.error('Feil ved oppdatering av deloppgave:', error);
         }
     };
 
@@ -394,11 +401,11 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
                         </div>
                     )}
 
-                    {todo.collaborators?.length > 0 && (
+                    {todo.collaboratorUsernames?.length > 0 && (
                         <div>
                             <h6>Delt med:</h6>
                             <ListGroup>
-                                {todo.collaborators.map((collaborator) => (
+                                {todo.collaboratorUsernames.map((collaborator) => (
                                     <ListGroup.Item
                                         key={collaborator}
                                         className="d-flex justify-content-between align-items-center"
