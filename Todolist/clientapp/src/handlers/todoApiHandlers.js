@@ -135,7 +135,7 @@ export const addCollaborator = async (todoId, username) => {
 export const removeCollaborator = async (todoId, username) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/collaborators/${todoId}/remove/${username}`, {
+        const response = await fetch(`http://localhost:5121/api/collaborators/remove/${username}?todoId=${todoId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,

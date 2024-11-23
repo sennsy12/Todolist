@@ -24,26 +24,31 @@ namespace Todolist.Services
 
         public async Task<bool> AddCollaboratorAsync(int todoId, int currentUserId, string collaboratorUsername)
         {
-            var todo = await _todoRepository.GetByIdForUserAsync(todoId, currentUserId);
-            if (todo == null || todo.UserId != currentUserId)
-                throw new Exceptions.UnauthorizedAccessException("You don't have permission to add collaborators to this todo");
+            if (!await _todoRepository.HasAccessAsync(todoId, currentUserId))
+                throw new Exceptions.UnauthorizedAccessException("Du har ikke tilgang til denne oppgaven");
+
             var collaborator = await _userRepository.GetByUsernameAsync(collaboratorUsername);
             if (collaborator == null)
-                throw new NotFoundException("User not found");
+                throw new NotFoundException("Bruker ikke funnet");
             if (collaborator.Id == currentUserId)
-                throw new InvalidOperationException("Cannot add yourself as a collaborator");
+                throw new InvalidOperationException("Du kan ikke legge til deg selv som samarbeidspartner");
+
             return await _collaboratorRepository.AddCollaboratorAsync(todoId, collaborator.Id);
         }
-
 
         public async Task<bool> RemoveCollaboratorAsync(int todoId, int currentUserId, string collaboratorUsername)
         {
             var todo = await _todoRepository.GetByIdForUserAsync(todoId, currentUserId);
-            if (todo == null || todo.UserId != currentUserId)
-                throw new Exceptions.UnauthorizedAccessException("You don't have permission to remove collaborators from this todo");
+            if (todo == null)
+                throw new Exceptions.UnauthorizedAccessException("Ingen tilgang til denne oppgaven");
+
             var collaborator = await _userRepository.GetByUsernameAsync(collaboratorUsername);
             if (collaborator == null)
-                throw new NotFoundException("User not found");
+                throw new NotFoundException("Bruker ikke funnet");
+
+            // Sjekk om brukeren som skal fjernes er eieren
+            if (collaborator.Id == todo.UserId)
+                throw new InvalidOperationException("Kan ikke fjerne eieren av oppgaven");
 
             return await _collaboratorRepository.RemoveCollaboratorAsync(todoId, collaborator.Id);
         }

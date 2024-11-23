@@ -63,10 +63,8 @@ namespace TodoList.Services
         public async Task<TodoResponseDto?> UpdateTodoForUserAsync(int id, TodoUpdateDto todoDto, int userId)
         {
             var existingTodo = await _todoRepository.GetByIdForUserAsync(id, userId);
-
             if (existingTodo == null)
-                return null;
-
+                throw new NotFoundException("Todo not found");
             existingTodo.Title = todoDto.Title;
             existingTodo.Description = todoDto.Description;
             existingTodo.IsCompleted = todoDto.IsCompleted;
@@ -84,11 +82,7 @@ namespace TodoList.Services
             var todo = await _todoRepository.GetByIdForUserAsync(id, userId);
             if (todo == null)
                 throw new NotFoundException("Todo not found");
-
-            if (todo.UserId != userId)
-                throw new System.UnauthorizedAccessException("You can only delete your own todos");
-
-            await _todoRepository.DeleteForUserAsync(id, userId);
+            await _todoRepository.DeleteAsync(id);
         }
 
         public async Task<IEnumerable<TodoResponseDto>> GetSharedTodosAsync(int userId)

@@ -72,20 +72,20 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
 
     const handleRemoveCollaborator = async (username) => {
         try {
+            if (username === todo.ownerUsername) {
+                setFeedbackMessage('Kan ikke fjerne eieren av oppgaven');
+                setTimeout(() => setFeedbackMessage(''), 3000);
+                return;
+            }
+
             await removeCollaborator(todo.id, username);
             if (onRefresh) {
                 await onRefresh();
-            } else {
-                const updatedTodo = {
-                    ...todo,
-                    collaboratorUsernames: todo.collaboratorUsernames.filter(u => u !== username)
-                };
-                onUpdate(updatedTodo);
             }
-            setFeedbackMessage('Samarbeidspartner ble fjernet');
         } catch (error) {
             console.error('Feil ved fjerning av samarbeidspartner:', error);
-            setFeedbackMessage('Kunne ikke fjerne samarbeidspartner');
+            setFeedbackMessage(error.message || 'Kunne ikke fjerne samarbeidspartner');
+            setTimeout(() => setFeedbackMessage(''), 3000);
         }
     };
 
@@ -410,7 +410,19 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
                                         key={collaborator}
                                         className="d-flex justify-content-between align-items-center"
                                     >
-                                        {collaborator}
+                                        <div className="d-flex align-items-center gap-2">
+                                            {collaborator === todo.ownerUsername ? (
+                                                <>
+                                                    <span>👑</span>
+                                                    {collaborator}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span>👤</span>
+                                                    {collaborator}
+                                                </>
+                                            )}
+                                        </div>
                                         <Button
                                             variant="link"
                                             className="text-danger p-0"

@@ -8,7 +8,7 @@ namespace TodoList.Repositories
         Task<Todo?> GetByIdForUserAsync(int id, int userId);
         Task<Todo> CreateAsync(Todo todo);
         Task<Todo> UpdateAsync(Todo todo);
-        Task DeleteForUserAsync(int id, int userId);
+        Task DeleteAsync(int id);
         Task<bool> HasAccessAsync(int todoId, int userId);
     }
 }

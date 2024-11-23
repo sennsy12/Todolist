@@ -57,17 +57,16 @@ namespace TodoList.Repositories
             return todo;
         }
 
-        public async Task DeleteForUserAsync(int id, int userId)
-        {
-            var todo = await _context.Todos
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
-
-            if (todo != null)
+            public async Task DeleteAsync(int id)
             {
-                _context.Todos.Remove(todo);
-                await _context.SaveChangesAsync();
+                var todo = await _context.Todos.FindAsync(id);
+                if (todo != null)
+                {
+                    _context.Todos.Remove(todo);
+                    await _context.SaveChangesAsync();
+                }
             }
-        }
+        
 
         public async Task<bool> HasAccessAsync(int todoId, int userId)
         {
