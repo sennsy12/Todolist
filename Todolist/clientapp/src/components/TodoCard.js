@@ -1,7 +1,9 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge, Form, Modal, ListGroup, Spinner, Alert, Dropdown } from 'react-bootstrap';
-import { ThreeDotsVertical } from 'react-bootstrap-icons';
+import { Card, Button, Badge, Form, Modal, ListGroup, Spinner, Alert, Dropdown, InputGroup } from 'react-bootstrap';
+import { ThreeDotsVertical, ClockFill, PeopleFill, ChatDotsFill, TrashFill, ChevronDown, ChevronUp, PlusLg  } from 'react-bootstrap-icons';
 import TodoForm from './TodoForm';
+import CollaboratorModal from './modals/CollaboratorModal';
+import CommentsModal from './modals/CommentsModal';
 import TimeCounter from './TimeCounter';
 import { format } from 'date-fns/format';
 import {
@@ -24,7 +26,7 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
     const [newComment, setNewComment] = useState('');
     const [comments, setComments] = useState([]);
     const [newSubTodo, setNewSubTodo] = useState('');
-    const [showSubTodos, setShowSubTodos] = useState(true);
+    const [showSubTodos, setShowSubTodos] = useState(false);
     const [loading, setLoading] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState('');
 
@@ -220,223 +222,133 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
     }, [showCommentsModal]);
 
     return (
-        <Card className="mb-3">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center gap-3">
-                    <div className="d-flex align-items-center gap-2">
-                        <Badge
-                            bg={todo.priority === 'High' ? 'danger' : todo.priority === 'Medium' ? 'warning' : 'success'}
-                            className="px-3 py-2 rounded-pill d-flex align-items-center gap-1"
-                        >
-                            <span>{todo.priority === 'High' ? '🔥' : todo.priority === 'Medium' ? '⚡' : '🌱'}</span>
-                            <span>{todo.priority === 'High' ? 'Høy' : todo.priority === 'Medium' ? 'Middels' : 'Lav'}</span>
-                        </Badge>
-
-                        <Badge
-                            bg="light"
-                            text="dark"
-                            className="px-3 py-2 rounded-pill d-flex align-items-center gap-1"
-                        >
-                            {todo.category && (
-                                <>
-                                    <span>
-                                        {todo.category.toLowerCase() === 'arbeid' ? '💼' :
-                                            todo.category.toLowerCase() === 'personlig' ? '🏠' :
-                                                todo.category.toLowerCase() === 'studie' ? '📚' :
-                                                    todo.category.toLowerCase() === 'trening' ? '🏃' :
-                                                        todo.category.toLowerCase() === 'møte' ? '👥' : '📌'}
-                                    </span>
-                                    <span>{todo.category}</span>
-                                </>
-                            )}
-                        </Badge>
+        <>
+            <Card className="border-0 rounded-lg shadow-lg mb-4 overflow-hidden">
+                <Card.Body className="p-0">
+                    <div className="bg-gradient-primary p-4 text-black">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h3 className="mb-0">{todo.title}</h3>
+                            <Dropdown align="end">
+                                <Dropdown.Toggle variant="link" className="text-black p-0">
+                                    <ThreeDotsVertical size={16} />
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    <Dropdown.Item onClick={() => setShowEditModal(true)}>Rediger</Dropdown.Item>
+                                    <Dropdown.Item className="text-danger" onClick={handleDelete}>Slett</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </div>
+                        <p className="mb-0">{todo.description}</p>
                     </div>
 
-                    {todo.dueDateTime && (
-                        <TimeCounter dueDateTime={todo.dueDateTime} />
-                    )}
-                </div>
-
-                <div>
-                    <Dropdown align="end">
-                        <Dropdown.Toggle variant="link" className="p-0" style={{ color: '#6c757d' }}>
-                            <ThreeDotsVertical size={20} />
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => setShowEditModal(true)}>
-                                Rediger
-                            </Dropdown.Item>
-                            <Dropdown.Item className="text-danger" onClick={handleDelete}>
-                                Slett
-                            </Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </div>
-            </Card.Header>
-
-            <Card.Body>
-                <Card.Title>{todo.title}</Card.Title>
-                <Card.Text>{todo.description}</Card.Text>
-
-                {todo.dueDateTime && (
-                    <div className="mb-3 text-muted">
-                        <small>
-                            Frist: {format(new Date(todo.dueDateTime), 'dd.MM.yyyy HH:mm')}
-                        </small>
-                    </div>
-                )}
-
-                {/* Collaborators Section */}
-                <div className="mb-3">
-                    <Button
-                        variant="outline-secondary"
-                        size="sm"
-                        onClick={() => setShowCollaboratorModal(true)}
-                        className="me-2"
-                    >
-                        Del oppgave
-                    </Button>
-                    <Button
-                        variant="outline-info"
-                        size="sm"
-                        onClick={() => setShowCommentsModal(true)}
-                    >
-                        Kommentarer
-                    </Button>
-                </div>
-
-                {/* Sub-todos Section */}
-                <div className="mb-3">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                        <h6 className="mb-0">Deloppgaver</h6>
-                        <Button
-                            variant="link"
-                            onClick={() => setShowSubTodos(!showSubTodos)}
-                            className="p-0"
-                        >
-                            {showSubTodos ? 'Skjul' : 'Vis'}
-                        </Button>
-                    </div>
-
-                    {showSubTodos && (
-                        <>
-                            <ListGroup className="mb-2">
-                                {todo.subTodos?.map((subTodo) => (
-                                    <ListGroup.Item
-                                        key={subTodo.id}
-                                        className="d-flex justify-content-between align-items-center"
-                                    >
-                                        <Form.Check
-                                            type="checkbox"
-                                            checked={subTodo.isCompleted}
-                                            onChange={() => handleToggleSubTodo(subTodo.id, subTodo.isCompleted)}
-                                            label={subTodo.text}
-                                            className={subTodo.isCompleted ? 'text-muted' : ''}
-                                        />
-                                        <Button
-                                            variant="link"
-                                            className="text-danger p-0"
-                                            onClick={() => handleDeleteSubTodo(subTodo.id)}
-                                        >
-                                            Slett
-                                        </Button>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                            <div className="d-flex gap-2">
-                                <Form.Control
-                                    type="text"
-                                    size="sm"
-                                    value={newSubTodo}
-                                    onChange={(e) => setNewSubTodo(e.target.value)}
-                                    placeholder="Legg til deloppgave..."
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                            handleAddSubTodo();
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    variant="outline-primary"
-                                    size="sm"
-                                    onClick={handleAddSubTodo}
-                                    disabled={loading}
-                                >
-                                    Legg til
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </Card.Body>
-
-            {/* Collaborator Modal */}
-            <Modal show={showCollaboratorModal} onHide={() => setShowCollaboratorModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Del oppgave</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Legg til samarbeidspartner</Form.Label>
-                        <div className="d-flex gap-2">
-                            <Form.Control
-                                type="text"
-                                value={newCollaborator}
-                                onChange={(e) => setNewCollaborator(e.target.value)}
-                                placeholder="Skriv inn brukernavn"
-                            />
-                            <Button
-                                variant="primary"
-                                onClick={handleAddCollaborator}
-                                disabled={loading}
+                    <div className="p-4">
+                        <div className="d-flex flex-wrap gap-2 mb-4">
+                            <Badge
+                                bg={todo.priority === 'High' ? 'danger' : todo.priority === 'Medium' ? 'warning' : 'success'}
+                                className="rounded-pill px-3 py-2"
                             >
-                                {loading ? <Spinner animation="border" size="sm" /> : 'Legg til'}
+                                {todo.priority === 'High' ? '🔥 Høy' : todo.priority === 'Medium' ? '⚡ Middels' : '🌱 Lav'}
+                            </Badge>
+
+                            {todo.category && (
+                                <Badge bg="light" text="dark" className="rounded-pill px-3 py-2">
+                                    {todo.category.toLowerCase() === 'arbeid' ? '💼' :
+                                        todo.category.toLowerCase() === 'personlig' ? '🏠' :
+                                            todo.category.toLowerCase() === 'studie' ? '📚' :
+                                                todo.category.toLowerCase() === 'trening' ? '🏃' :
+                                                    todo.category.toLowerCase() === 'møte' ? '👥' : '📌'}
+                                    {' '}{todo.category}
+                                </Badge>
+                            )}
+                        </div>
+
+                        {todo.dueDateTime && (
+                            <div className="d-flex align-items-center mb-4">
+                                <ClockFill className="text-primary me-2" />
+                                <small className="text-muted">
+                                    Frist: {format(new Date(todo.dueDateTime), 'dd.MM.yyyy HH:mm')}
+                                </small>
+                                <div className="ms-auto">
+                                    <TimeCounter dueDateTime={todo.dueDateTime} />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="d-flex gap-2 mb-4">
+                            <Button variant="outline-primary" size="sm" onClick={() => setShowCollaboratorModal(true)}>
+                                <PeopleFill className="me-1" /> Del oppgave
+                            </Button>
+                            <Button variant="outline-info" size="sm" onClick={() => setShowCommentsModal(true)}>
+                                <ChatDotsFill className="me-1" /> Kommentarer
                             </Button>
                         </div>
-                    </Form.Group>
 
-                    {feedbackMessage && (
-                        <div className="mt-3">
-                            <Alert variant="success">{feedbackMessage}</Alert>
-                        </div>
-                    )}
+                        <div className="mb-4">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h6 className="mb-0">Deloppgaver</h6>
+                                <Button
+                                    variant="link"
+                                    onClick={() => setShowSubTodos(!showSubTodos)}
+                                    className="p-0"
+                                >
+                                    {showSubTodos ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                </Button>
+                            </div>
 
-                    {todo.collaboratorUsernames?.length > 0 && (
-                        <div>
-                            <h6>Delt med:</h6>
-                            <ListGroup>
-                                {todo.collaboratorUsernames.map((collaborator) => (
-                                    <ListGroup.Item
-                                        key={collaborator}
-                                        className="d-flex justify-content-between align-items-center"
-                                    >
-                                        <div className="d-flex align-items-center gap-2">
-                                            {collaborator === todo.ownerUsername ? (
-                                                <>
-                                                    <span>👑</span>
-                                                    {collaborator}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>👤</span>
-                                                    {collaborator}
-                                                </>
-                                            )}
-                                        </div>
-                                        <Button
-                                            variant="link"
-                                            className="text-danger p-0"
-                                            onClick={() => handleRemoveCollaborator(collaborator)}
-                                        >
-                                            Fjern
+                            {showSubTodos && (
+                                <>
+                                    <ListGroup variant="flush" className="mb-3">
+                                        {todo.subTodos?.map((subTodo) => (
+                                            <ListGroup.Item key={subTodo.id} className="d-flex justify-content-between align-items-center px-0 py-2 border-0">
+                                                <Form.Check
+                                                    type="checkbox"
+                                                    checked={subTodo.isCompleted}
+                                                    onChange={() => handleToggleSubTodo(subTodo.id, subTodo.isCompleted)}
+                                                    label={subTodo.text}
+                                                    className={`${subTodo.isCompleted ? 'text-muted' : ''} m-0`}
+                                                />
+                                                <Button variant="link" className="text-danger p-0" onClick={() => handleDeleteSubTodo(subTodo.id)}>
+                                                    <TrashFill size={16} />
+                                                </Button>
+                                            </ListGroup.Item>
+                                        ))}
+                                    </ListGroup>
+                                    <div className="d-flex gap-2">
+                                        <Form.Control
+                                            type="text"
+                                            size="sm"
+                                            value={newSubTodo}
+                                            onChange={(e) => setNewSubTodo(e.target.value)}
+                                            placeholder="Legg til deloppgave..."
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleAddSubTodo();
+                                                }
+                                            }}
+                                        />
+                                        <Button variant="primary" size="sm" onClick={handleAddSubTodo} disabled={loading}>
+                                            <PlusLg />
                                         </Button>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    )}
-                </Modal.Body>
-            </Modal>
+                    </div>
+                </Card.Body>
+            </Card>
+
+            {/* Collaborator Modal */}
+            <CollaboratorModal
+                show={showCollaboratorModal}
+                onHide={() => setShowCollaboratorModal(false)}
+                newCollaborator={newCollaborator}
+                setNewCollaborator={setNewCollaborator}
+                handleAddCollaborator={handleAddCollaborator}
+                loading={loading}
+                feedbackMessage={feedbackMessage}
+                todo={todo}
+                handleRemoveCollaborator={handleRemoveCollaborator}
+            />
 
             {/* TodoForm Modal */}
             <TodoForm
@@ -446,48 +358,18 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
                 show={showEditModal}
                 onHide={() => setShowEditModal(false)}
             />
-          
 
             {/* Comments Modal */}
-            <Modal show={showCommentsModal} onHide={() => setShowCommentsModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Kommentarer</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="comments-container mb-3" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                        {comments.map((comment) => (
-                            <div key={comment.id} className="mb-3 p-3 bg-light rounded">
-                                <div className="d-flex justify-content-between">
-                                    <strong>{comment.username}</strong>
-                                    <small className="text-muted">
-                                        {format(new Date(comment.createdAt), 'dd.MM.yyyy HH:mm')}
-                                    </small>
-                                </div>
-                                <p className="mb-0 mt-2">{comment.text}</p>
-                            </div>
-                        ))}
-                    </div>
-                    <Form.Group>
-                        <Form.Control
-                            as="textarea"
-                            rows={3}
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Skriv en kommentar..."
-                        />
-                    </Form.Group>
-                    <div className="d-flex justify-content-end mt-3">
-                        <Button
-                            variant="primary"
-                            onClick={handleAddComment}
-                            disabled={loading}
-                        >
-                            {loading ? <Spinner animation="border" size="sm" /> : 'Legg til kommentar'}
-                        </Button>
-                    </div>
-                </Modal.Body>
-            </Modal>
-        </Card>
+            <CommentsModal
+                show={showCommentsModal}
+                onHide={() => setShowCommentsModal(false)}
+                comments={comments}
+                newComment={newComment}
+                setNewComment={setNewComment}
+                handleAddComment={handleAddComment}
+                loading={loading}
+            />
+        </>
     );
 };
 
