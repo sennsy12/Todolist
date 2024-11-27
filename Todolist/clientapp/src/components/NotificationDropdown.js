@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Dropdown, Badge, Stack } from 'react-bootstrap';
-import { BellFill, Circle, CircleFill } from 'react-bootstrap-icons';
+import { Stack, Badge,  Offcanvas } from 'react-bootstrap';
+import { BellFill } from 'react-bootstrap-icons';
 import { fetchNotifications, markNotificationAsRead } from '../handlers/NotificationApiHandler';
 
-const NotificationDropdown = () => {
+const NotificationDropdown = ({ expanded }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isOpen, setIsOpen] = useState(false);
 
     const getNotifications = async () => {
         try {
@@ -28,70 +29,132 @@ const NotificationDropdown = () => {
 
     useEffect(() => {
         getNotifications();
-        const interval = setInterval(getNotifications, 30000); // Poll every 30 seconds
+        const interval = setInterval(getNotifications, 30000);
         return () => clearInterval(interval);
     }, []);
 
     return (
-        <Dropdown align="end">
-        <Dropdown.Toggle variant="link" className="nav-link position-relative p-2">
-            <BellFill className="text-white" size={16} />
-            {unreadCount > 0 && (
-                <Badge 
-                    bg="danger" 
-                    className="position-absolute top-0 start-100 translate-middle rounded-pill"
-                >
-                    {unreadCount}
-                </Badge>
-            )}
-        </Dropdown.Toggle>
-
-        <Dropdown.Menu style={{ minWidth: '350px', maxHeight: '500px', overflow: 'auto' }}>
-            <Dropdown.Header className="d-flex justify-content-between align-items-center">
-                <span className="fw-bold">Varsler</span>
-                {unreadCount > 0 && (
-                    <Badge bg="primary">{unreadCount} uleste</Badge>
-                )}
-            </Dropdown.Header>
-            <Dropdown.Divider />
-
-            {notifications.length === 0 ? (
-                <Dropdown.ItemText className="text-center py-3 text-muted">
-                    <BellFill size={20} className="mb-2" />
-                    <div>Ingen nye varsler</div>
-                </Dropdown.ItemText>
-            ) : (
-                notifications.map(notification => (
-                    <Dropdown.Item 
-                        key={notification.id}
-                        onClick={() => handleMarkAsRead(notification.id)}
-                        className="py-3"
+        <>
+            {expanded ? (
+                <div className="notification-container">
+                    <div className="d-flex align-items-center gap-2 mb-2">
+                        <BellFill size={16} className="text-white" />
+                        <span className="text-white flex-grow-1">Varsler</span>
+                        {unreadCount > 0 && (
+                            <Badge 
+                                bg="danger" 
+                                pill
+                                style={{ fontSize: '0.75rem' }}
+                            >
+                                {unreadCount}
+                            </Badge>
+                        )}
+                    </div>
+                    <div 
+                        style={{ 
+                            maxHeight: '300px', 
+                            overflowY: 'auto',
+                            background: '#2d2d2d',
+                            borderRadius: '8px'
+                        }}
                     >
-                        <Stack direction="horizontal" gap={2}>
-                            {!notification.isRead ? (
-                                <CircleFill className="text-primary" size={8} />
-                            ) : (
-                                <Circle className="text-muted" size={8} />
-                            )}
-                            <Stack className="w-100">
-                                <div className={!notification.isRead ? 'fw-semibold' : ''}>
+                        {notifications.map(notification => (
+                            <div 
+                                key={notification.id}
+                                className="border-bottom border-secondary p-2"
+                                onClick={() => handleMarkAsRead(notification.id)}
+                                style={{ 
+                                    cursor: 'pointer',
+                                    background: notification.isRead ? 'transparent' : '#363636'
+                                }}
+                            >
+                                <div className="text-white small">
                                     {notification.message}
                                 </div>
-                                <small className="text-muted">
-                                    {new Date(notification.createdAt).toLocaleString('no-NO', {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        day: 'numeric',
-                                        month: 'short'
-                                    })}
-                                </small>
-                            </Stack>
-                        </Stack>
-                    </Dropdown.Item>
-                ))
+                                <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                                    {new Date(notification.createdAt).toLocaleString('no-NO')}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div 
+                        className="d-flex align-items-center justify-content-center"
+                        style={{ position: 'relative', width: '100%' }}
+                    >
+                        <BellFill 
+                            size={20} 
+                            className="text-white" 
+                            onClick={() => setIsOpen(true)}
+                            style={{ cursor: 'pointer' }}
+                        />
+                        {unreadCount > 0 && (
+                            <Badge 
+                                bg="danger" 
+                                className="position-absolute"
+                                style={{ 
+                                    fontSize: '0.65rem',
+                                    top: '-8px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)'
+                                }}
+                            >
+                                {unreadCount}
+                            </Badge>
+                        )}
+                    </div>
+
+                    <Offcanvas 
+                        show={isOpen} 
+                        onHide={() => setIsOpen(false)}
+                        placement="end"
+                        style={{
+                            width: '300px',
+                            background: '#1e1e1e'
+                        }}
+                    >
+                        <Offcanvas.Header closeButton className="border-bottom border-secondary">
+                            <Offcanvas.Title className="text-white">
+                                <div className="d-flex align-items-center gap-2">
+                                    <BellFill size={16} />
+                                    <span>Varsler</span>
+                                    {unreadCount > 0 && (
+                                        <Badge bg="danger" pill>{unreadCount}</Badge>
+                                    )}
+                                </div>
+                            </Offcanvas.Title>
+                        </Offcanvas.Header>
+                        <Offcanvas.Body className="p-0">
+                            {notifications.map(notification => (
+                                <div 
+                                    key={notification.id}
+                                    className="border-bottom border-secondary p-2"
+                                    onClick={() => handleMarkAsRead(notification.id)}
+                                    style={{ 
+                                        cursor: 'pointer',
+                                        background: notification.isRead ? 'transparent' : '#363636'
+                                    }}
+                                >
+                                    <div className="text-white small">
+                                        {notification.message}
+                                    </div>
+                                    <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                                        {new Date(notification.createdAt).toLocaleString('no-NO')}
+                                    </div>
+                                </div>
+                            ))}
+                            {notifications.length === 0 && (
+                                <div className="text-center text-muted p-3">
+                                    Ingen varsler å vise
+                                </div>
+                            )}
+                        </Offcanvas.Body>
+                    </Offcanvas>
+                </>
             )}
-        </Dropdown.Menu>
-    </Dropdown>
+        </>
     );
 };
 
