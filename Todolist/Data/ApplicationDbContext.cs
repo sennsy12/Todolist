@@ -16,6 +16,7 @@ namespace TodoList.Data
         public DbSet<TodoCollaborator> TodoCollaborators { get; set; }
         public DbSet<SubTodo> SubTodos { get; set; }
         public DbSet<TodoComment> TodoComments { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

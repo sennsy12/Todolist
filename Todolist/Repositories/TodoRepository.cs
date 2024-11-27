@@ -57,22 +57,41 @@ namespace TodoList.Repositories
             return todo;
         }
 
-            public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
+        {
+            // Delete related notifications first
+            var notifications = await _context.Notifications
+                .Where(n => n.RelatedTodoId == id)
+                .ToListAsync();
+            
+            _context.Notifications.RemoveRange(notifications);
+
+            // Now delete the todo
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo != null)
             {
-                var todo = await _context.Todos.FindAsync(id);
-                if (todo != null)
-                {
-                    _context.Todos.Remove(todo);
-                    await _context.SaveChangesAsync();
-                }
+                _context.Todos.Remove(todo);
+                await _context.SaveChangesAsync();
             }
-        
+        }
 
         public async Task<bool> HasAccessAsync(int todoId, int userId)
         {
             return await _context.Todos
                 .AnyAsync(t => t.Id == todoId &&
                     (t.UserId == userId || t.Collaborators.Any(c => c.UserId == userId)));
+        }
+
+        public async Task<Todo?> GetByIdAsync(int id)
+        {
+            return await _context.Todos
+                .Include(t => t.User)
+                .Include(t => t.Collaborators)
+                    .ThenInclude(c => c.User)
+                .Include(t => t.SubTodos)
+                .Include(t => t.Comments)
+                    .ThenInclude(c => c.User)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
     }
 }

@@ -44,7 +44,7 @@ builder.Services.AddScoped<ICollaboratorRepository, CollaboratorRepository>();
 builder.Services.AddScoped<ISubTodoRepository, SubTodoRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
-
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 // Service registrations
 builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -52,7 +52,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISubTodoService, SubTodoService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ICollaboratorService, CollaboratorService>();
-
+builder.Services.AddScoped<INotificationService, NotificationService>();
 // JWT Authentication configuration
 var secretKey = builder.Configuration["Jwt:SecretKey"];
 if (string.IsNullOrEmpty(secretKey))
@@ -129,7 +129,7 @@ app.Use(async (context, next) =>
     }
 });
 
-// Bruk endpoints for bedre routing-håndtering
+// Bruk endpoints for bedre routing-hï¿½ndtering
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();

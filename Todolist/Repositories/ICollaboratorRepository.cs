@@ -11,5 +11,6 @@ namespace TodoList.Repositories
         Task<List<TodoCollaborator>> GetCollaboratorsAsync(int todoId);
         Task<List<Todo>> GetSharedTodosAsync(int userId);
         Task<bool> HasAccessAsync(int todoId, int userId);
+        Task<bool> IsCollaboratorAsync(int todoId, int userId);
     }
 }

@@ -3,6 +3,7 @@ using Todolist.Exceptions;
 using TodoList.DTOs;
 using TodoList.Repositories;
 using TodoList.Services;
+using TodoList.Models;
 
 namespace Todolist.Services
 {
@@ -11,30 +12,68 @@ namespace Todolist.Services
         private readonly ICollaboratorRepository _collaboratorRepository;
         private readonly ITodoRepository _todoRepository;
         private readonly IUserRepository _userRepository;
+        private readonly INotificationRepository _notificationRepository;
 
         public CollaboratorService(
             ICollaboratorRepository collaboratorRepository,
             ITodoRepository todoRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            INotificationRepository notificationRepository)
         {
             _collaboratorRepository = collaboratorRepository;
             _todoRepository = todoRepository;
             _userRepository = userRepository;
+            _notificationRepository = notificationRepository;
         }
 
-        public async Task<bool> AddCollaboratorAsync(int todoId, int currentUserId, string collaboratorUsername)
-        {
-            if (!await _todoRepository.HasAccessAsync(todoId, currentUserId))
-                throw new Exceptions.UnauthorizedAccessException("Du har ikke tilgang til denne oppgaven");
+       public async Task<bool> AddCollaboratorAsync(int todoId, int currentUserId, string collaboratorUsername)
+{
+    // Sjekk om brukeren har tilgang til oppgaven
+    if (!await _todoRepository.HasAccessAsync(todoId, currentUserId))
+        throw new Exceptions.UnauthorizedAccessException("Du har ikke tilgang til denne oppgaven");
 
-            var collaborator = await _userRepository.GetByUsernameAsync(collaboratorUsername);
-            if (collaborator == null)
-                throw new NotFoundException("Bruker ikke funnet");
-            if (collaborator.Id == currentUserId)
-                throw new InvalidOperationException("Du kan ikke legge til deg selv som samarbeidspartner");
+    // Hent oppgaven
+    var todo = await _todoRepository.GetByIdAsync(todoId);
+    if (todo == null)
+        throw new NotFoundException("Oppgaven ble ikke funnet");
 
-            return await _collaboratorRepository.AddCollaboratorAsync(todoId, collaborator.Id);
-        }
+    // Hent samarbeidspartneren som skal legges til
+    var collaborator = await _userRepository.GetByUsernameAsync(collaboratorUsername);
+    if (collaborator == null)
+        throw new NotFoundException("Bruker ble ikke funnet");
+
+    // Sjekk om brukeren som skal legges til er eieren av listen
+    if (collaborator.Id == todo.UserId)
+        throw new InvalidOperationException("Eieren av listen kan ikke legges til som samarbeidspartner");
+
+    // Sjekk om brukeren prøver å legge til seg selv
+    if (collaborator.Id == currentUserId)
+        throw new InvalidOperationException("Du kan ikke legge til deg selv som samarbeidspartner");
+
+    // Sjekk om samarbeidspartneren allerede er lagt til
+    if (await _collaboratorRepository.IsCollaboratorAsync(todoId, collaborator.Id))
+        throw new InvalidOperationException("Denne brukeren er allerede lagt til som samarbeidspartner");
+
+    // Hent gjeldende bruker for notifikasjonsmeldingen
+    var currentUser = await _userRepository.GetByIdAsync(currentUserId);
+    if (currentUser == null)
+        throw new NotFoundException("Gjeldende bruker ble ikke funnet");
+
+    // Opprett notifikasjon for den nye samarbeidspartneren
+    var notification = new Notification
+    {
+        UserId = collaborator.Id,
+        Message = $"{currentUser.Username} har lagt deg til som samarbeidspartner på oppgaven '{todo.Title}'",
+        IsRead = false,
+        CreatedAt = DateTime.UtcNow,
+        Type = "CollaboratorInvite",
+        RelatedTodoId = todoId
+    };
+
+    // Lagre notifikasjon og legg til samarbeidspartner
+    await _notificationRepository.CreateAsync(notification);
+    return await _collaboratorRepository.AddCollaboratorAsync(todoId, collaborator.Id);
+}
 
         public async Task<bool> RemoveCollaboratorAsync(int todoId, int currentUserId, string collaboratorUsername)
         {

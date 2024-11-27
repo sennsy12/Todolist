@@ -10,5 +10,6 @@ namespace TodoList.Repositories
         Task<Todo> UpdateAsync(Todo todo);
         Task DeleteAsync(int id);
         Task<bool> HasAccessAsync(int todoId, int userId);
+        Task<Todo> GetByIdAsync(int todoId);
     }
 }

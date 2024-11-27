@@ -2,6 +2,7 @@
 import { Navbar, Container, Nav } from 'react-bootstrap';
 import { logoutUser } from '../handlers/AuthHandler';
 import { useNavigate } from 'react-router-dom';
+import NotificationDropdown from './NotificationDropdown';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ const Header = () => {
         <Navbar bg="dark" variant="dark" expand="lg">
             <Container>
                 <Navbar.Brand href="/">Todo App</Navbar.Brand>
-                <Nav className="ml-auto">
+                <Nav className="ml-auto d-flex align-items-center">
                     {!localStorage.getItem('token') ? (
                         <>
                             <Nav.Link href="/login">Logg Inn</Nav.Link>
@@ -23,6 +24,7 @@ const Header = () => {
                         </>
                     ) : (
                         <>
+                            <NotificationDropdown />
                             <Nav.Link href="/shared-todos">Delte Todos</Nav.Link>
                             <Nav.Link onClick={handleLogout}>Logg Ut</Nav.Link>
                         </>

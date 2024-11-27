@@ -53,6 +53,12 @@ namespace TodoList.Repositories
                 .ToListAsync();
         }
 
+
+public async Task<bool> IsCollaboratorAsync(int todoId, int userId)
+{
+    return await _context.TodoCollaborators
+        .AnyAsync(c => c.TodoId == todoId && c.UserId == userId);
+}
         public async Task<List<Todo>> GetSharedTodosAsync(int userId)
         {
             return await _context.TodoCollaborators
