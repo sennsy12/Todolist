@@ -137,7 +137,7 @@ const TodoList = () => {
 
     return (
         <Container className="py-5">
-            <div className="d-flex justify-content-between align-items-center mb-4">
+            <header className="d-flex justify-content-between align-items-center mb-4">
                 <h1>Mine Oppgaver</h1>
                 <Button
                     variant="primary"
@@ -145,7 +145,7 @@ const TodoList = () => {
                 >
                     Ny Oppgave
                 </Button>
-            </div>
+            </header>
 
             {error && (
                 <Alert variant="danger" className="mb-4" onClose={() => setError(null)} dismissible>
