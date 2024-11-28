@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿import React, { useEffect } from 'react';
 import { Modal, Form, Button, Spinner } from 'react-bootstrap';
 import { format } from 'date-fns';
 
@@ -11,6 +11,15 @@ const CommentsModal = ({
     handleAddComment,
     loading
 }) => {
+
+    useEffect(() => {
+        if (show) {
+            const container = document.querySelector('.comments-container');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+    }, [show, comments]);
     return (
         <Modal show={show} onHide={onHide}>
             <Modal.Header closeButton>

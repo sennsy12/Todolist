@@ -1,5 +1,4 @@
-﻿// MainComp.jsx
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import Sidebar from './components/Sidebar';
@@ -23,14 +22,22 @@ const MainComp = () => {
     };
 
     return (
-        <div className="d-flex">
+        <div className="d-flex" style={{ minHeight: '100vh' }}>
             <Sidebar 
                 expanded={sidebarExpanded}
                 onToggle={() => setSidebarExpanded(!sidebarExpanded)}
                 onLogout={handleLogout}
             />
             
-            <div className={`main-content flex-grow-1 ${sidebarExpanded ? 'content-expanded' : 'content-collapsed'}`}>
+            <div 
+                className="main-content flex-grow-1"
+                style={{
+                    marginLeft: sidebarExpanded ? '240px' : '70px',
+                    transition: 'margin-left 0.3s ease',
+                    width: 'calc(100% - ${sidebarExpanded ? "240px" : "70px"})',
+                    minWidth: 0
+                }}
+            >
                 <Container fluid>
                     <Routes>
                         <Route path="/" element={<TodoList />} />

@@ -43,11 +43,16 @@ const Sidebar = ({ expanded, onToggle, onLogout }) => {
     return (
         <Container 
             fluid 
-            className={`bg-dark position-fixed h-100 p-0`} 
+            className={`bg-dark h-100 p-0`} 
             style={{ 
+                position: 'fixed',
+                left: 0,
+                top: 0,
                 width: expanded ? '240px' : '70px',
                 transition: 'width 0.3s ease',
-                zIndex: 1030 
+                zIndex: 1030,
+                overflowX: 'hidden',
+                overflowY: 'auto'
             }}
         >
             <Stack className="h-100">

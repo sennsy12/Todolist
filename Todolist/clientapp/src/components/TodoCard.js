@@ -242,25 +242,36 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
                     </div>
 
                     <div className="p-4">
-                        <div className="d-flex flex-wrap gap-2 mb-4">
-                            <Badge
-                                bg={todo.priority === 'High' ? 'danger' : todo.priority === 'Medium' ? 'warning' : 'success'}
-                                className="rounded-pill px-3 py-2"
-                            >
-                                {todo.priority === 'High' ? '🔥 Høy' : todo.priority === 'Medium' ? '⚡ Middels' : '🌱 Lav'}
-                            </Badge>
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="d-flex gap-2">
+            <Badge
+                bg={todo.priority === 'High' ? 'danger' : todo.priority === 'Medium' ? 'warning' : 'success'}
+                className="rounded-pill px-3 py-2"
+            >
+                {todo.priority === 'High' ? '🔥 Høy' : todo.priority === 'Medium' ? '⚡ Middels' : '🌱 Lav'}
+            </Badge>
 
-                            {todo.category && (
-                                <Badge bg="light" text="dark" className="rounded-pill px-3 py-2">
-                                    {todo.category.toLowerCase() === 'arbeid' ? '💼' :
-                                        todo.category.toLowerCase() === 'personlig' ? '🏠' :
-                                            todo.category.toLowerCase() === 'studie' ? '📚' :
-                                                todo.category.toLowerCase() === 'trening' ? '🏃' :
-                                                    todo.category.toLowerCase() === 'møte' ? '👥' : '📌'}
-                                    {' '}{todo.category}
-                                </Badge>
-                            )}
-                        </div>
+            {todo.category && (
+                <Badge bg="light" text="dark" className="rounded-pill px-3 py-2">
+                    {todo.category.toLowerCase() === 'arbeid' ? '💼' :
+                        todo.category.toLowerCase() === 'personlig' ? '🏠' :
+                            todo.category.toLowerCase() === 'studie' ? '📚' :
+                                todo.category.toLowerCase() === 'trening' ? '🏃' :
+                                    todo.category.toLowerCase() === 'møte' ? '👥' : '📌'}
+                    {' '}{todo.category}
+                </Badge>
+            )}
+        </div>
+        
+        <div className="d-flex gap-2">
+            <Button variant="outline-primary" size="sm" onClick={() => setShowCollaboratorModal(true)}>
+                <PeopleFill />
+            </Button>
+            <Button variant="outline-info" size="sm" onClick={() => setShowCommentsModal(true)}>
+                <ChatDotsFill />
+            </Button>
+        </div>
+    </div>
 
                         {todo.dueDateTime && (
                             <div className="d-flex align-items-center mb-4">
@@ -274,7 +285,7 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
                             </div>
                         )}
 
-                        <div className="d-flex gap-2 mb-4">
+<div className="d-flex gap-2 mb-4">
                             <Button variant="outline-primary" size="sm" onClick={() => setShowCollaboratorModal(true)}>
                                 <PeopleFill className="me-1" /> Del oppgave
                             </Button>

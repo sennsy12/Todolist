@@ -30,7 +30,7 @@ const SharedTodosPage = () => {
             setSharedTodos(data);
         } catch (error) {
             console.error('Error loading shared todos:', error);
-            setError('Kunne ikke laste delte oppgaver. Prøv igjen senere.');
+            setError('Kunne ikke laste delte oppgaver. Prï¿½v igjen senere.');
         } finally {
             setLoading(false);
         }
@@ -56,7 +56,7 @@ const SharedTodosPage = () => {
             await loadSharedTodos();
         } catch (error) {
             console.error('Error updating todo:', error);
-            setError('Kunne ikke oppdatere oppgaven. Prøv igjen senere.');
+            setError('Kunne ikke oppdatere oppgaven. Prï¿½v igjen senere.');
         }
     };
 
@@ -66,7 +66,7 @@ const SharedTodosPage = () => {
             await loadSharedTodos();
         } catch (error) {
             console.error('Error deleting todo:', error);
-            setError('Kunne ikke slette oppgaven. Prøv igjen senere.');
+            setError('Kunne ikke slette oppgaven. Prï¿½v igjen senere.');
         }
     };
 
@@ -94,7 +94,7 @@ const SharedTodosPage = () => {
                 </Col>
                 <Col sm={6} md={3}>
                     <div className="bg-success bg-opacity-10 p-3 rounded">
-                        <h6>Fullført</h6>
+                        <h6>FullfÃ¸rt</h6>
                         <h3>{stats.completed}</h3>
                     </div>
                 </Col>
@@ -120,7 +120,7 @@ const SharedTodosPage = () => {
 
             {sharedTodos.length === 0 ? (
                 <Alert variant="info">
-                    Ingen delte oppgaver funnet. Når noen deler en oppgave med deg, vil den vises her.
+                    Ingen delte oppgaver funnet. NÃ¥r noen deler en oppgave med deg, vil den vises her.
                 </Alert>
             ) : (
                 <Row className="g-4">
