@@ -285,14 +285,7 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
                             </div>
                         )}
 
-<div className="d-flex gap-2 mb-4">
-                            <Button variant="outline-primary" size="sm" onClick={() => setShowCollaboratorModal(true)}>
-                                <PeopleFill className="me-1" /> Del oppgave
-                            </Button>
-                            <Button variant="outline-info" size="sm" onClick={() => setShowCommentsModal(true)}>
-                                <ChatDotsFill className="me-1" /> Kommentarer
-                            </Button>
-                        </div>
+
 
                         <div className="mb-4">
                             <div className="d-flex justify-content-between align-items-center mb-3">
