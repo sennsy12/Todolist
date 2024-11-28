@@ -140,13 +140,9 @@ const NotificationDropdown = ({ expanded }) => {
                                     <div className="text-white small">
                                         {notification.message}
                                     </div>
-                                <div 
-                                     className="text-white ms-auto" 
-                                    style={{ fontSize: '0.7rem', textAlign: 'right' }}
-                                    >
-                                     {new Date(notification.createdAt).toLocaleString('no-NO')}
-                                </div>
-
+                                    <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                                        {new Date(notification.createdAt).toLocaleString('no-NO')}
+                                    </div>
                                 </div>
                             ))}
                             {notifications.length === 0 && (
