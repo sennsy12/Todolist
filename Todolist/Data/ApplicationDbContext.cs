@@ -9,7 +9,6 @@ namespace TodoList.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public DbSet<User> Users { get; set; }
@@ -105,10 +104,10 @@ namespace TodoList.Data
             {
                 entity.Property(t => t.Title)
                     .IsRequired()
-                    .HasMaxLength(100);
+                    .HasMaxLength(200);
 
                 entity.Property(t => t.Description)
-                    .HasMaxLength(500);
+                    .HasMaxLength(1000);
 
                 entity.Property(t => t.Category)
                     .HasMaxLength(50);

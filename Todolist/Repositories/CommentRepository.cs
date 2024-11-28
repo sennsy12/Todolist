@@ -19,7 +19,7 @@ namespace Todolist.Repositories
             return await _context.TodoComments
                 .Include(c => c.User)
                 .Where(c => c.TodoId == todoId)
-                .OrderBy(c => c.CreatedAt)
+                .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }
 

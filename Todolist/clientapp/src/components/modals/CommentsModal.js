@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+﻿import React from 'react';
 import { Modal, Form, Button, Spinner } from 'react-bootstrap';
 import { format } from 'date-fns';
 
@@ -11,28 +11,13 @@ const CommentsModal = ({
     handleAddComment,
     loading
 }) => {
-    useEffect(() => {
-        if (show) {
-            const container = document.querySelector('.comments-container');
-            if (container) {
-                container.scrollTop = container.scrollHeight;
-            }
-        }
-    }, [show, comments]);
-
     return (
         <Modal show={show} onHide={onHide}>
             <Modal.Header closeButton>
                 <Modal.Title>Kommentarer</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div 
-                    className="comments-container mb-3" 
-                    style={{ 
-                        maxHeight: '300px', 
-                        overflowY: 'auto'
-                    }}
-                >
+                <div className="comments-container mb-3" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                     {comments.map((comment) => (
                         <div key={comment.id} className="mb-3 p-3 bg-light rounded">
                             <div className="d-flex justify-content-between">
