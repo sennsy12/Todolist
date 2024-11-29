@@ -55,7 +55,7 @@ const NotificationDropdown = ({ expanded }) => {
                             maxHeight: '300px', 
                             overflowY: 'auto',
                             background: '#2d2d2d',
-                            borderRadius: '8px'
+                            borderRadius: '3px'
                         }}
                     >
                         {notifications.map(notification => (
@@ -81,7 +81,7 @@ const NotificationDropdown = ({ expanded }) => {
             ) : (
                 <>
                     <div 
-                        className="d-flex align-items-center justify-content-center"
+                        className="d-flex align-items-center"
                         style={{ position: 'relative', width: '100%' }}
                     >
                         <BellFill 
@@ -90,15 +90,22 @@ const NotificationDropdown = ({ expanded }) => {
                             onClick={() => setIsOpen(true)}
                             style={{ cursor: 'pointer' }}
                         />
+                        <span 
+                            className="text-white ms-2" 
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => setIsOpen(true)}
+                        >
+                            Varsler
+                        </span>
                         {unreadCount > 0 && (
                             <Badge 
                                 bg="danger" 
                                 className="position-absolute"
                                 style={{ 
                                     fontSize: '0.65rem',
-                                    top: '-8px',
-                                    left: '50%',
-                                    transform: 'translateX(-50%)'
+                                    top: '5px',
+                                    right: '195px',
+                                    transform: 'translate(50%, -50%)'
                                 }}
                             >
                                 {unreadCount}
