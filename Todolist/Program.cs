@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using Todolist.Repositories;
 using Todolist.Services;
@@ -45,6 +46,7 @@ builder.Services.AddScoped<ISubTodoRepository, SubTodoRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
 // Service registrations
 builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -53,6 +55,7 @@ builder.Services.AddScoped<ISubTodoService, SubTodoService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ICollaboratorService, CollaboratorService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+
 // JWT Authentication configuration
 var secretKey = builder.Configuration["Jwt:SecretKey"];
 if (string.IsNullOrEmpty(secretKey))
@@ -82,9 +85,41 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// API Explorer and Swagger
+// API Explorer and Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Todolist API",
+        Version = "v1",
+        Description = "API for Todolist application"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Error handling
 builder.Services.AddProblemDetails();
@@ -129,7 +164,6 @@ app.Use(async (context, next) =>
     }
 });
 
-// Bruk endpoints for bedre routing-h�ndtering
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
