@@ -23,24 +23,22 @@ const MainComp = () => {
 
     return (
         <div className="d-flex" style={{ minHeight: '100vh' }}>
-            <Sidebar 
+            <Sidebar
                 expanded={sidebarExpanded}
                 onToggle={() => setSidebarExpanded(!sidebarExpanded)}
                 onLogout={handleLogout}
             />
-            
-            <div 
-                className="main-content flex-grow-1"
-                style={{
-                    marginLeft: sidebarExpanded ? '240px' : '70px',
-                    transition: 'margin-left 0.3s ease',
-                    width: `calc(100% - ${sidebarExpanded ? "240px" : "70px"})`,
-                    minWidth: 0
-                }}
-            >
+
+            <div className="main-content flex-grow-1" style={{
+                marginLeft: sidebarExpanded ? '240px' : '70px',
+                transition: 'margin-left 0.3s ease',
+                width: `calc(100% - ${sidebarExpanded ? "240px" : "70px"})`,
+                minWidth: 0
+            }}>
                 <Container fluid>
                     <Routes>
-                        <Route path="/" element={<TodoList />} />
+                        <Route path="/" element={<Navigate to="/login" replace />} />
+                        <Route path="/todos" element={<TodoList />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
