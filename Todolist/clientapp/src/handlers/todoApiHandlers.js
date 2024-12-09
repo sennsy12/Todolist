@@ -1,4 +1,4 @@
-﻿// src/api/todoApiHandlers.js
+// src/api/todoApiHandlers.js
 
 // Todo handlers
 export const fetchTodos = async () => {
@@ -14,7 +14,7 @@ export const fetchTodos = async () => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
 
         return await response.json();

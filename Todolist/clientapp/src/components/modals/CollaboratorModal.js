@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Modal, Form, Button, Spinner, Alert, ListGroup, Badge } from 'react-bootstrap';
 import { PeopleFill } from 'react-bootstrap-icons';
 

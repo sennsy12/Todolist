@@ -1,4 +1,4 @@
-﻿// Henter alle todos for den innloggede brukeren
+// Henter alle todos for den innloggede brukeren
 export const fetchTodos = async () => {
     try {
         const token = localStorage.getItem('token');

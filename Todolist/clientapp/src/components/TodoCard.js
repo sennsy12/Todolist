@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge, Form, Modal, ListGroup, Spinner, Alert, Dropdown, InputGroup } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Card, Button, Badge, Form, ListGroup, Dropdown, } from 'react-bootstrap';
 import { ThreeDotsVertical, ClockFill, PeopleFill, ChatDotsFill, TrashFill, ChevronDown, ChevronUp, PlusLg  } from 'react-bootstrap-icons';
 import TodoForm from './TodoForm';
 import CollaboratorModal from './modals/CollaboratorModal';
@@ -184,35 +184,6 @@ const TodoCard = ({ todo, onUpdate, onDelete, onAddSubTodo, onUpdateSubTodo, onD
         }
     };
 
-    const getPriorityBadge = (priority) => {
-        switch (priority) {
-            case 'High':
-                return { emoji: '🔥', text: 'Høy prioritet', variant: 'danger' };
-            case 'Medium':
-                return { emoji: '⚡', text: 'Middels prioritet', variant: 'warning' };
-            case 'Low':
-                return { emoji: '🌱', text: 'Lav prioritet', variant: 'success' };
-            default:
-                return { emoji: '⭐', text: 'Prioritet', variant: 'info' };
-        }
-    };
-
-    const getCategoryEmoji = (category) => {
-        switch (category?.toLowerCase()) {
-            case 'arbeid':
-                return '💼';
-            case 'personlig':
-                return '🏠';
-            case 'studie':
-                return '📚';
-            case 'trening':
-                return '🏃';
-            case 'møte':
-                return '👥';
-            default:
-                return '📌';
-        }
-    };
 
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Button, Spinner } from 'react-bootstrap';
 import { format } from 'date-fns';
 

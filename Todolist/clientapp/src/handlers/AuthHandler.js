@@ -1,4 +1,4 @@
-﻿export const loginUser = async (credentials) => {
+export const loginUser = async (credentials) => {
     try {
         console.log('Login credentials:', credentials);
         const response = await fetch('http://localhost:5121/api/auth/login', {

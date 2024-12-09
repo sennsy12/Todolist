@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { loginUser } from '../handlers/AuthHandler';
 import { useNavigate } from 'react-router-dom';
 import { Button, Form, Container, Row, Col, Alert, Card } from 'react-bootstrap';

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Navbar, Container, Nav } from 'react-bootstrap';
 import { logoutUser } from '../handlers/AuthHandler';
 import { useNavigate } from 'react-router-dom';

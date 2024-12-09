@@ -1,4 +1,4 @@
-﻿// components/TimeCounter.jsx
+// components/TimeCounter.jsx
 import React, { useState, useEffect } from 'react';
 import './TimeCounter.css';
 

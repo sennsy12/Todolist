@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Form, Button, Container, Row, Col, Alert, Card } from 'react-bootstrap';
 import { resetPassword } from '../handlers/ResetPasswordHandler';

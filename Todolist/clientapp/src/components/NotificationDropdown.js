@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Stack, Badge,  Offcanvas } from 'react-bootstrap';
+import { Badge,  Offcanvas } from 'react-bootstrap';
 import { BellFill } from 'react-bootstrap-icons';
 import { fetchNotifications, markNotificationAsRead } from '../handlers/NotificationApiHandler';
 

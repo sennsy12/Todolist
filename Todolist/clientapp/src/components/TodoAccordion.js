@@ -1,4 +1,4 @@
-﻿// components/TodoAccordion.jsx
+// components/TodoAccordion.jsx
 import React from 'react';
 import { Accordion, Alert } from 'react-bootstrap';
 import TodoItem from './TodoItem';

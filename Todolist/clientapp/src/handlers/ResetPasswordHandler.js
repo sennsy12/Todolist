@@ -1,6 +1,6 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 
-const API_URL = 'http://localhost:5121/api/passwordreset';
+// const API_URL = 'http://localhost:5121/api/passwordreset';
 
 export const requestPasswordReset = async (email) => {
     try {
