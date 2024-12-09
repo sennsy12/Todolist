@@ -1,0 +1,38 @@
+{
+  "routes": [
+    {
+      "route": "/",
+      "serve": "/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/login",
+      "serve": "/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/forgot-password",
+      "serve": "/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/register",
+      "serve": "/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/todos",
+      "serve": "/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/{*}",
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/api/*"]
+  }
+}
