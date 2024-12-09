@@ -103,7 +103,7 @@ const Sidebar = ({ expanded, onToggle, onLogout }) => {
                                 </div>
                             )}
                             <Nav.Link 
-                                href="/" 
+                                href="/todos" 
                                 className="text-white py-3 px-3"
                                 style={{ whiteSpace: 'nowrap' }}
                             >
