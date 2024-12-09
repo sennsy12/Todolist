@@ -37,11 +37,7 @@ const MainComp = () => {
             }}>
                 <Container fluid>
                     <Routes>
-                        <Route path="/" element={
-                            localStorage.getItem('token')
-                                ? <Navigate to="/todos" replace />
-                                : <Navigate to="/login" replace />
-                        } />
+                        <Route path="/" element={<Navigate to="/login" replace />} />
                         <Route path="/todos" element={<TodoList />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />

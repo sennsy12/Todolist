@@ -20,16 +20,9 @@ namespace TodoList.Services
         {
             _configuration = configuration;
             _repository = repository;
-
-            var apiKey = _configuration["MailjetSettings:ApiKey"];
-            var apiSecret = _configuration["MailjetSettings:ApiSecret"];
-
-            if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
-            {
-                throw new ArgumentException("Mailjet-innstillinger mangler i konfigurasjon");
-            }
-
-            _client = new MailjetClient(apiKey, apiSecret);
+            _client = new MailjetClient(
+                _configuration["Mailjet:ApiKey"],
+                _configuration["Mailjet:ApiSecret"]);
         }
 
         public async Task<bool> SendResetPasswordEmailAsync(ForgotPasswordDto forgotPasswordDto)
@@ -40,17 +33,16 @@ namespace TodoList.Services
             var token = Guid.NewGuid().ToString("N");
             await _repository.UpdateUserResetTokenAsync(user, token);
 
-            var baseUrl = _configuration["AppUrl"];
-            var resetLink = $"{baseUrl}/reset-password?token={token}&email={forgotPasswordDto.Email}";
+            var resetLink = $"{_configuration["AppUrl"]}/reset-password?token={token}&email={forgotPasswordDto.Email}";
 
             var request = new MailjetRequest
             {
                 Resource = Send.Resource
             }
-            .Property(Send.FromEmail, _configuration["MailjetSettings:SenderEmail"])
+            .Property(Send.FromEmail, _configuration["Mailjet:SenderEmail"])
             .Property(Send.FromName, "TodoList App")
-            .Property(Send.Subject, "Tilbakestill passord")
-            .Property(Send.HtmlPart, GenerateResetEmailHtml(token, forgotPasswordDto.Email))
+            .Property(Send.Subject, "Reset Your Password")
+            .Property(Send.HtmlPart, $"Click <a href='{resetLink}'>here</a> to reset your password")
             .Property(Send.Recipients, new JArray {
         new JObject {
             {"Email", forgotPasswordDto.Email}
@@ -61,15 +53,6 @@ namespace TodoList.Services
             return response.IsSuccessStatusCode;
         }
 
-        private string GenerateResetEmailHtml(string token, string email)
-        {
-            var resetLink = $"{_configuration["AppUrl"]}/reset-password?token={token}&email={email}";
-            return $@"
-        <h2>Tilbakestill ditt passord</h2>
-        <p>Klikk på lenken under for å tilbakestille passordet ditt:</p>
-        <p><a href='{resetLink}'>Tilbakestill passord</a></p>
-        <p>Lenken er gyldig i 1 time.</p>";
-        }
 
 
 
