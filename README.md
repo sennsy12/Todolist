@@ -6,7 +6,6 @@ I aim to enhance the application further with the following upgrades:
 2. **Backend Hosting**: Host the backend on **Azure App Services**.  
 3. **Frontend Hosting**: Deploy the React frontend to **Netlify**.  
 
-![image](https://github.com/user-attachments/assets/f25e5ec4-89db-4bfa-ae47-498f92660729)
 
  ## Example Pictures
  Logg inn > ![image](https://github.com/user-attachments/assets/bff218cc-6801-43d5-9380-5bd679e91662)
