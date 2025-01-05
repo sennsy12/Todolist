@@ -20,9 +20,9 @@ const RegisterPage = () => {
             await registerUser(credentials);
             setSuccess('Registreringen var vellykket!');
             setError(null);
-            setTimeout(() => navigate('/login'), 60000); 
+            setTimeout(() => navigate('/login'), 60000);
         } catch (err) {
-            setError('Registrering mislyktes');
+            setError(err.data || err.message || 'Registrering mislyktes');
             setSuccess(null);
         }
     };

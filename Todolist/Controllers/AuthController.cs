@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TodoList.DTOs;
 using TodoList.Services;
+using Microsoft.Extensions.Logging;
 
 namespace TodoList.Controllers
 {
@@ -9,10 +10,12 @@ namespace TodoList.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, ILogger<AuthController> logger)
         {
             _userService = userService;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -25,7 +28,7 @@ namespace TodoList.Controllers
             }
             catch (Exception ex)
             {
-
+                _logger.LogError(ex, "Registration failed with error: {Message}", ex.Message);
                 return BadRequest($"Registration failed: {ex.Message}");
             }
         }

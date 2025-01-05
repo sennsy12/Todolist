@@ -35,11 +35,14 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 
 // Database configuration with global query splitting behavior
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
-    ));
+    options.UseNpgsql(connectionString));
 
 // Repository registrations
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
