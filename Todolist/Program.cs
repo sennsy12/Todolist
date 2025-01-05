@@ -31,7 +31,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp", builder =>
     {
         builder
-            .WithOrigins("http://localhost:3000")
+            .WithOrigins(
+                "http://localhost:3000",
+                "https://witty-pebble-0207a2103.4.azurestaticapps.net"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
