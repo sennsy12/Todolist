@@ -119,8 +119,6 @@ catch (Exception ex)
     throw;
 }
 
-var port = Environment.GetEnvironmentVariable("WEBSITES_PORT") ?? "80";
-builder.WebHost.UseUrls($"http://+:{port}");
 
 var app = builder.Build();
 
