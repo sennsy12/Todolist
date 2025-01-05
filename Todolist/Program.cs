@@ -15,7 +15,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// Legg til routing-konfigurasjon
+// Routing configuration
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 // CORS configuration
@@ -31,11 +31,15 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Controllers
 builder.Services.AddControllers();
 
-// Database configuration
+// Database configuration with global query splitting behavior
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+    ));
 
 // Repository registrations
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
@@ -45,6 +49,7 @@ builder.Services.AddScoped<ISubTodoRepository, SubTodoRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
 // Service registrations
 builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -53,6 +58,7 @@ builder.Services.AddScoped<ISubTodoService, SubTodoService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ICollaboratorService, CollaboratorService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+
 // JWT Authentication configuration
 var secretKey = builder.Configuration["Jwt:SecretKey"];
 if (string.IsNullOrEmpty(secretKey))
@@ -107,7 +113,7 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
-// CORS must be between UseRouting and UseAuthorization
+// CORS configuration
 app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
@@ -129,7 +135,7 @@ app.Use(async (context, next) =>
     }
 });
 
-// Bruk endpoints for bedre routing-h�ndtering
+// Endpoints for controllers
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
