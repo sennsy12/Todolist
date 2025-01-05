@@ -7,8 +7,15 @@ using Todolist.Services;
 using TodoList.Data;
 using TodoList.Repositories;
 using TodoList.Services;
+using System.Reflection;
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add explicit assembly loading
+Assembly.Load("Microsoft.EntityFrameworkCore");
+Assembly.Load("Npgsql.EntityFrameworkCore.PostgreSQL");
 
 // Logging
 builder.Logging.ClearProviders();
@@ -35,68 +42,79 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 
 // Database configuration with global query splitting behavior
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrEmpty(connectionString))
+try 
 {
-    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-}
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
-// Repository registrations
-builder.Services.AddScoped<ITodoRepository, TodoRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ICollaboratorRepository, CollaboratorRepository>();
-builder.Services.AddScoped<ISubTodoRepository, SubTodoRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
-builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-
-// Service registrations
-builder.Services.AddScoped<ITodoService, TodoService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ISubTodoService, SubTodoService>();
-builder.Services.AddScoped<ICommentService, CommentService>();
-builder.Services.AddScoped<ICollaboratorService, CollaboratorService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
-
-// JWT Authentication configuration
-var secretKey = builder.Configuration["Jwt:SecretKey"];
-if (string.IsNullOrEmpty(secretKey))
-{
-    throw new ArgumentNullException("SecretKey", "JWT Secret Key is missing in configuration.");
-}
-
-var key = Encoding.ASCII.GetBytes(secretKey);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
-});
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        }
+        options.UseNpgsql(connectionString);
+    });
 
-// API Explorer and Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    // Repository registrations
+    builder.Services.AddScoped<ITodoRepository, TodoRepository>();
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<ICollaboratorRepository, CollaboratorRepository>();
+    builder.Services.AddScoped<ISubTodoRepository, SubTodoRepository>();
+    builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+    builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
+    builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
-// Error handling
-builder.Services.AddProblemDetails();
+    // Service registrations
+    builder.Services.AddScoped<ITodoService, TodoService>();
+    builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IEmailService, EmailService>();
+    builder.Services.AddScoped<ISubTodoService, SubTodoService>();
+    builder.Services.AddScoped<ICommentService, CommentService>();
+    builder.Services.AddScoped<ICollaboratorService, CollaboratorService>();
+    builder.Services.AddScoped<INotificationService, NotificationService>();
+
+    // JWT Authentication configuration
+    var secretKey = builder.Configuration["Jwt:SecretKey"];
+    if (string.IsNullOrEmpty(secretKey))
+    {
+        throw new ArgumentNullException("SecretKey", "JWT Secret Key is missing in configuration.");
+    }
+
+    var key = Encoding.ASCII.GetBytes(secretKey);
+
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+    // API Explorer and Swagger
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    // Error handling
+    builder.Services.AddProblemDetails();
+}
+catch (Exception ex)
+{
+    var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                             .CreateLogger<Program>();
+    logger.LogError(ex, "Application startup failed");
+    throw;
+}
 
 var app = builder.Build();
 
