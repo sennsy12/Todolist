@@ -48,14 +48,12 @@ builder.Services.AddControllers();
 try 
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    {
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-        }
-        options.UseNpgsql(connectionString);
-    });
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+    ));
+        
+    
 
     // Repository registrations
     builder.Services.AddScoped<ITodoRepository, TodoRepository>();
