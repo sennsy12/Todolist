@@ -18,7 +18,7 @@ namespace TodoList.Controllers
             _logger = logger;
         }
 
-        [HttpPost("register")]
+                [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto registerDto)
         {
             try
@@ -32,6 +32,7 @@ namespace TodoList.Controllers
                 return BadRequest($"Registration failed: {ex.Message}");
             }
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto loginDto)
