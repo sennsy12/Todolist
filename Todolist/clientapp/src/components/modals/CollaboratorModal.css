@@ -1,0 +1,98 @@
+.collaborator-modal {
+    max-width: 500px;
+}
+
+.modal-header.bg-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+}
+
+.modal-icon-wrapper {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-icon {
+    font-size: 1.5rem;
+}
+
+.fs-7 {
+    font-size: 0.875rem;
+}
+
+.letter-spacing-2 {
+    letter-spacing: 0.05em;
+}
+
+.collaboration-input-wrapper {
+    display: flex;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.collaboration-input-wrapper .form-control {
+    background: white;
+    border-radius: 8px;
+}
+
+.add-collaborator-btn {
+    white-space: nowrap;
+    border-radius: 8px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.collaborator-list .list-group-item {
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.collaborator-list .list-group-item:hover {
+    transform: translateY(-1px);
+}
+
+.collaborator-badge {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-right: 12px;
+}
+
+.collaborator-badge.owner {
+    background: #fef3c7;
+}
+
+.collaborator-badge.member {
+    background: #dbeafe;
+}
+
+.collaborator-name {
+    color: #374151;
+}
+
+.remove-btn {
+    color: #ef4444;
+    padding: 6px;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    opacity: 1;
+    color: #dc2626;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+} 

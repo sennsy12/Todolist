@@ -1,23 +1,11 @@
-// src/api/todoApiHandlers.js
+import { axiosInstance } from '../config/axiosConfig';
+
 
 // Todo handlers
 export const fetchTodos = async () => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5121/api/todos/all', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-
-        return await response.json();
+        const response = await axiosInstance.get('/todos/all');
+        return response.data;
     } catch (error) {
         console.error('Error fetching todos:', error);
         throw error;
@@ -26,18 +14,8 @@ export const fetchTodos = async () => {
 
 export const createTodo = async (todoData) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5121/api/todos/create', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(todoData)
-        });
-
-        if (!response.ok) throw new Error('Failed to create todo');
-        return await response.json();
+        const response = await axiosInstance.post('/todos/create', todoData);
+        return response.data;
     } catch (error) {
         console.error('Error creating todo:', error);
         throw error;
@@ -49,30 +27,15 @@ export const updateTodo = async (todoId, todoData) => {
         if (!todoId) {
             throw new Error('Todo ID is required');
         }
-
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/update/${todoId}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: todoData.title,
-                description: todoData.description,
-                isCompleted: todoData.isCompleted || false,
-                category: todoData.category,
-                dueDateTime: todoData.dueDateTime,
-                priority: todoData.priority
-            })
+        const response = await axiosInstance.put(`/todos/update/${todoId}`, {
+            title: todoData.title,
+            description: todoData.description,
+            isCompleted: todoData.isCompleted || false,
+            category: todoData.category,
+            dueDateTime: todoData.dueDateTime,
+            priority: todoData.priority
         });
-
-        if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(errorData);
-        }
-
-        return await response.json();
+        return response.data;
     } catch (error) {
         console.error('Error updating todo:', error);
         throw error;
@@ -84,21 +47,7 @@ export const deleteTodo = async (todoId) => {
         if (!todoId) {
             throw new Error('Todo ID is required');
         }
-
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/delete/${todoId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || 'Failed to delete todo');
-        }
+        await axiosInstance.delete(`/todos/delete/${todoId}`);
     } catch (error) {
         console.error('Error deleting todo:', error);
         throw error;
@@ -108,24 +57,8 @@ export const deleteTodo = async (todoId) => {
 // Collaborator handlers
 export const addCollaborator = async (todoId, username) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/collaborators/${todoId}/add`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username })
-        });
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            return await response.json();
-        } else {
-            if (response.ok) {
-                return { success: true };
-            }
-            throw new Error('Kunne ikke legge til samarbeidspartner');
-        }
+        const response = await axiosInstance.post(`/collaborators/${todoId}/add`, { username });
+        return response.data;
     } catch (error) {
         console.error('Error adding collaborator:', error);
         throw error;
@@ -134,19 +67,7 @@ export const addCollaborator = async (todoId, username) => {
 
 export const removeCollaborator = async (todoId, username) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/collaborators/remove/${username}?todoId=${todoId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || 'Kunne ikke fjerne samarbeidspartner');
-        }
+        await axiosInstance.delete(`/collaborators/remove/${username}?todoId=${todoId}`);
     } catch (error) {
         console.error('Feil ved fjerning av samarbeidspartner:', error);
         throw error;
@@ -155,15 +76,8 @@ export const removeCollaborator = async (todoId, username) => {
 
 export const fetchSharedTodos = async () => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5121/api/todos/shared', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch shared todos');
-        return await response.json();
+        const response = await axiosInstance.get('/todos/shared');
+        return response.data;
     } catch (error) {
         console.error('Error fetching shared todos:', error);
         throw error;
@@ -173,18 +87,8 @@ export const fetchSharedTodos = async () => {
 // SubTodo handlers
 export const addSubTodo = async (todoId, text) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/${todoId}/subtodos`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ text })
-        });
-
-        if (!response.ok) throw new Error('Failed to add sub-todo');
-        return await response.json();
+        const response = await axiosInstance.post(`/todos/${todoId}/subtodos`, { text });
+        return response.data;
     } catch (error) {
         console.error('Error adding sub-todo:', error);
         throw error;
@@ -193,21 +97,11 @@ export const addSubTodo = async (todoId, text) => {
 
 export const updateSubTodo = async (todoId, subTodoId, updates) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/${todoId}/subtodos/${subTodoId}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                text: updates.text || '',  
-                isCompleted: updates.isCompleted
-            })
+        const response = await axiosInstance.put(`/todos/${todoId}/subtodos/${subTodoId}`, {
+            text: updates.text || '',
+            isCompleted: updates.isCompleted
         });
-
-        if (!response.ok) throw new Error('Failed to update sub-todo');
-        return await response.json();
+        return response.data;
     } catch (error) {
         console.error('Error updating sub-todo:', error);
         throw error;
@@ -216,15 +110,7 @@ export const updateSubTodo = async (todoId, subTodoId, updates) => {
 
 export const deleteSubTodo = async (todoId, subTodoId) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/${todoId}/subtodos/${subTodoId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) throw new Error('Failed to delete sub-todo');
+        await axiosInstance.delete(`/todos/${todoId}/subtodos/${subTodoId}`);
     } catch (error) {
         console.error('Error deleting sub-todo:', error);
         throw error;
@@ -234,18 +120,8 @@ export const deleteSubTodo = async (todoId, subTodoId) => {
 // Comment handlers
 export const addComment = async (todoId, text) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/${todoId}/comments`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ text })
-        });
-
-        if (!response.ok) throw new Error('Failed to add comment');
-        return await response.json();
+        const response = await axiosInstance.post(`/todos/${todoId}/comments`, { text });
+        return response.data;
     } catch (error) {
         console.error('Error adding comment:', error);
         throw error;
@@ -254,15 +130,8 @@ export const addComment = async (todoId, text) => {
 
 export const fetchComments = async (todoId) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/${todoId}/comments`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch comments');
-        return await response.json();
+        const response = await axiosInstance.get(`/todos/${todoId}/comments`);
+        return response.data;
     } catch (error) {
         console.error('Error fetching comments:', error);
         throw error;
@@ -271,15 +140,7 @@ export const fetchComments = async (todoId) => {
 
 export const deleteComment = async (todoId, commentId) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5121/api/todos/${todoId}/comments/${commentId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) throw new Error('Failed to delete comment');
+        await axiosInstance.delete(`/todos/${todoId}/comments/${commentId}`);
     } catch (error) {
         console.error('Error deleting comment:', error);
         throw error;

@@ -1,18 +1,10 @@
-const BASE_URL = 'http://localhost:5121/api';
+import { axiosInstance } from '../config/axiosConfig';
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-        'Authorization': `Bearer ${token}`
-    };
-};
 
 export const fetchNotifications = async () => {
     try {
-        const response = await fetch(`${BASE_URL}/notifications`, {
-            headers: getAuthHeaders()
-        });
-        return await response.json();
+        const response = await axiosInstance.get('/notifications');
+        return response.data;
     } catch (error) {
         console.error('Error fetching notifications:', error);
         throw error;
@@ -21,10 +13,7 @@ export const fetchNotifications = async () => {
 
 export const markNotificationAsRead = async (notificationId) => {
     try {
-        await fetch(`${BASE_URL}/notifications/${notificationId}/read`, {
-            method: 'PUT',
-            headers: getAuthHeaders()
-        });
+        await axiosInstance.put(`/notifications/${notificationId}/read`);
     } catch (error) {
         console.error('Error marking notification as read:', error);
         throw error;

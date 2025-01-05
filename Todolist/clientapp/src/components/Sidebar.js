@@ -1,8 +1,9 @@
 import React from 'react';
 import { Nav, Container, Button, Stack } from 'react-bootstrap';
-import { List, X, House, Share, BoxArrowRight, Key, PersonPlus } from 'react-bootstrap-icons';
+import {  House, Share, BoxArrowRight, Key, PersonPlus } from 'react-bootstrap-icons';
 import { toast } from 'react-toastify';
 import NotificationDropdown from './NotificationDropdown';
+import { motion } from 'framer-motion';
 
 const Sidebar = ({ expanded, onToggle, onLogout }) => {
     const handleLogout = () => {
@@ -61,13 +62,66 @@ const Sidebar = ({ expanded, onToggle, onLogout }) => {
                         {expanded && (
                             <h3 className="text-white mb-0 fs-5">Todo App</h3>
                         )}
-                        <Button 
-                            variant="link" 
-                            className="text-white p-1" 
-                            onClick={onToggle}
-                        >
-                            {expanded ? <X size={20} /> : <List size={20} />}
-                        </Button>
+                        <motion.button
+    className="btn p-1"
+    style={{
+        background: 'transparent',
+        border: 'none',
+        width: '32px',
+        height: '32px',
+        position: 'relative',
+        cursor: 'pointer'
+    }}
+    onClick={onToggle}
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.9 }}
+>
+    <motion.div
+        style={{
+            width: '20px',
+            height: '2px',
+            background: expanded ? '#ff6b6b' : '#ffffff',
+            position: 'absolute',
+            top: '10px',
+            left: '6px'
+        }}
+        animate={{
+            rotate: expanded ? 45 : 0,
+            y: expanded ? 6 : 0
+        }}
+        transition={{ duration: 0.3 }}
+    />
+    <motion.div
+        style={{
+            width: expanded ? '20px' : '15px',
+            height: '2px',
+            background: '#ffffff',
+            position: 'absolute',
+            top: '16px',
+            left: '6px'
+        }}
+        animate={{
+            opacity: expanded ? 0 : 1,
+            x: expanded ? 20 : 0
+        }}
+        transition={{ duration: 0.3 }}
+    />
+    <motion.div
+        style={{
+            width: '20px',
+            height: '2px',
+            background: expanded ? '#ff6b6b' : '#ffffff',
+            position: 'absolute',
+            top: '22px',
+            left: '6px'
+        }}
+        animate={{
+            rotate: expanded ? -45 : 0,
+            y: expanded ? -6 : 0
+        }}
+        transition={{ duration: 0.3 }}
+    />
+</motion.button>
                     </Stack>
                 </div>
 
@@ -96,22 +150,20 @@ const Sidebar = ({ expanded, onToggle, onLogout }) => {
                             </Nav.Link>
                         </>
                     ) : (
-                        <>
-                            {expanded && (
-                                <div className="px-3 py-3">
-                                    <NotificationDropdown />
-                                </div>
-                            )}
-                            <Nav.Link 
-                                href="/todos" 
-                                className="text-white py-3 px-3"
-                                style={{ whiteSpace: 'nowrap' }}
-                            >
-                                <Stack direction="horizontal" gap={2}>
-                                    <House />
-                                    {expanded && 'Mine Oppgaver'}
-                                </Stack>
-                            </Nav.Link>
+                      
+                            <>
+                                <NotificationDropdown expanded={expanded} />
+        <Nav.Link 
+            href="/todos" 
+            className="text-white py-3 px-3"
+            style={{ whiteSpace: 'nowrap' }}
+        >
+            <Stack direction="horizontal" gap={2}>
+                <House />
+                {expanded && 'Mine Oppgaver'}
+            </Stack>
+        </Nav.Link>
+                        
                             <Nav.Link 
                                 href="/shared-todos" 
                                 className="text-white py-3 px-3"
